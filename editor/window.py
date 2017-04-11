@@ -5,6 +5,8 @@ from gi.repository import Gio, Gtk
 
 from editor.widgets.playerswidget import PlayersWidget
 from editor.widgets.phaseswidget import PhasesWidget
+from editor.widgets.propertiespanel import PropertiesPanel
+from editor.widgets.gamecharts import GameCharts
 
 
 MENU_XML="""
@@ -22,20 +24,24 @@ MENU_XML="""
 </interface>
 """
 
-
 class EditorWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         Gtk.ApplicationWindow.__init__(self, title='Editor', application=app)
         self.set_position(Gtk.WindowPosition.CENTER)
 
+        self.main_HBox = Gtk.HBox()
+
         self.left_panel = Gtk.VBox()
         self.players_widget = PlayersWidget()
         self.left_panel.pack_start(self.players_widget, True, True, 0)
-
         self.phases_widget = PhasesWidget()
         self.left_panel.pack_start(self.phases_widget, True, True, 0)
 
-        self.add(self.left_panel)
+        self.main_HBox.pack_start(self.left_panel, True, True, 0)
+        self.main_HBox.pack_start(GameCharts(), True, True, 0)
+        self.main_HBox.pack_start(PropertiesPanel(), True, True, 0)
+
+        self.add(self.main_HBox)
 
 
 class EditorApplication(Gtk.Application):
