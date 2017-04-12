@@ -3,7 +3,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 
-class ListBoxHeader(Gtk.HBox):
+class PanelHeader(Gtk.HBox):
     def __init__(self, name):
         Gtk.HBox.__init__(self)
 

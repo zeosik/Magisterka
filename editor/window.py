@@ -1,12 +1,14 @@
 import sys
+
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gio, Gtk
 
-from editor.widgets.playerswidget import PlayersWidget
-from editor.widgets.phaseswidget import PhasesWidget
-from editor.widgets.propertiespanel import PropertiesPanel
-from editor.widgets.gamecharts import GameCharts
+from editor.widgets.special.playerswidget import PlayersWidget
+from editor.widgets.special.phaseswidget import PhasesWidget
+from editor.widgets.special.propertiespanel import PropertiesPanel
+from editor.widgets.special.gamecharts import GameCharts
 from editor.mediator import Mediator
 
 MENU_XML="""
@@ -28,6 +30,8 @@ class EditorWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         Gtk.ApplicationWindow.__init__(self, title='Editor', application=app)
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_size_request(800, 600)
+
         self.mediator = Mediator()
 
         self.main_HBox = Gtk.HBox()
