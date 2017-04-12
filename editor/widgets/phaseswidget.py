@@ -8,11 +8,16 @@ from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
 class PhasesWidget(ItemsPanel):
 
-    def __init__(self):
-        ItemsPanel.__init__(self, 'List of Phases')
+    def __init__(self, mediator):
+        ItemsPanel.__init__(self, 'List of Phases', mediator.select_phase)
 
         self.next_phase_index = 1
         self.phases = []
+
+        self.mediator = mediator
+        self.mediator.register_on_player_add_listener(self.clear_selection)
+        self.mediator.register_on_player_select_listener(self.clear_selection)
+        self.mediator.register_on_phase_add_listener(self.on_phase_add)
 
         add_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_ADD))
         add_button.connect('clicked', self.add_phase)
@@ -22,7 +27,11 @@ class PhasesWidget(ItemsPanel):
     def add_phase(self, button):
         name = 'Phase-' + str(self.next_phase_index)
         self.next_phase_index += 1
-        phase = Phase(name)
-        self.phases.append(phase)
+        self.mediator.add_phase(Phase(name))
 
-        self.list_box.add_item(phase.name)
+    def on_phase_add(self, phase):
+        self.phases.append(phase)
+        self.list_box.add_item(phase, phase.name)
+
+    def clear_selection(self, p):
+        self.list_box.clear_selection()

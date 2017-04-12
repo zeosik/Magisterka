@@ -7,7 +7,7 @@ from editor.widgets.playerswidget import PlayersWidget
 from editor.widgets.phaseswidget import PhasesWidget
 from editor.widgets.propertiespanel import PropertiesPanel
 from editor.widgets.gamecharts import GameCharts
-
+from editor.mediator import Mediator
 
 MENU_XML="""
 <?xml version="1.0" encoding="UTF-8"?>
@@ -28,13 +28,14 @@ class EditorWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         Gtk.ApplicationWindow.__init__(self, title='Editor', application=app)
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.mediator = Mediator()
 
         self.main_HBox = Gtk.HBox()
 
         self.left_panel = Gtk.VBox()
-        self.players_widget = PlayersWidget()
+        self.players_widget = PlayersWidget(self.mediator)
         self.left_panel.pack_start(self.players_widget, True, True, 0)
-        self.phases_widget = PhasesWidget()
+        self.phases_widget = PhasesWidget(self.mediator)
         self.left_panel.pack_start(self.phases_widget, True, True, 0)
 
         self.main_HBox.pack_start(self.left_panel, True, True, 0)

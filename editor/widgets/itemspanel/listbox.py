@@ -5,17 +5,18 @@ from gi.repository import Gtk
 
 class ListBox(Gtk.ScrolledWindow):
 
-    def __init__(self):
+    def __init__(self, on_row_select):
         Gtk.ScrolledWindow.__init__(self)
 
         self.list_box = Gtk.ListBox()
+        self.list_box.connect('row-activated', lambda lb, row: on_row_select(row.object))
         self.add_with_viewport(self.list_box)
 
-    def add_item(self, name):
+    def add_item(self, object, display_name):
         row = Gtk.ListBoxRow()
         row_hbox = Gtk.HBox()
 
-        label = Gtk.Label(name)
+        label = Gtk.Label(display_name)
         label.set_alignment(0, 0.5)
         row_hbox.pack_start(label, True, True, 5)
 
@@ -25,6 +26,7 @@ class ListBox(Gtk.ScrolledWindow):
         row_hbox.pack_start(remove_button, True, True, 0)
 
         row.add(row_hbox)
+        row.object = object
 
         self.list_box.add(row)
         self.list_box.show_all()
@@ -32,3 +34,6 @@ class ListBox(Gtk.ScrolledWindow):
     def remove_item(self, button):
         self.list_box.remove(button.row)
         self.list_box.show_all()
+
+    def clear_selection(self):
+        self.list_box.unselect_all()
