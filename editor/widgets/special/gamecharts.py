@@ -11,6 +11,7 @@ class GameCharts(Gtk.VBox):
         Gtk.VBox.__init__(self)
 
         self.general_chart = GeneralChartWidget()
+        self.general_chart.set_size_request(150, 0)
         self.pack_start(self.general_chart, True, True, 0)
 
         self.detailed_chart = Gtk.VBox()
