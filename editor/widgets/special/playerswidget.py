@@ -4,6 +4,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common.player import Player
+from common.game import Game
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
 names = ['Alice', 'Bob', 'John']
@@ -14,7 +15,6 @@ class PlayersWidget(ItemsPanel):
         ItemsPanel.__init__(self, 'List of Players', mediator.select_player)
 
         self.next_name_index = 0
-        self.players = []
 
         self.mediator = mediator
         self.mediator.register_on_player_add_listener(self.on_player_add)
@@ -32,7 +32,7 @@ class PlayersWidget(ItemsPanel):
         self.mediator.add_player(player)
 
     def on_player_add(self, player):
-        self.players.append(player)
+        Game.add_player(player)
         self.list_box.add_item(player, player.name)
 
     def clear_selection(self, p):

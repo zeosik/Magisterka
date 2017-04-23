@@ -1,8 +1,10 @@
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common.phase import Phase
+from common.game import Game
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
 
@@ -12,7 +14,6 @@ class PhasesWidget(ItemsPanel):
         ItemsPanel.__init__(self, 'List of Phases', mediator.select_phase)
 
         self.next_phase_index = 1
-        self.phases = []
 
         self.mediator = mediator
         self.mediator.register_on_player_add_listener(self.clear_selection)
@@ -30,7 +31,7 @@ class PhasesWidget(ItemsPanel):
         self.mediator.add_phase(Phase(name))
 
     def on_phase_add(self, phase):
-        self.phases.append(phase)
+        Game.add_phase(phase)
         self.list_box.add_item(phase, phase.name)
 
     def clear_selection(self, p):
