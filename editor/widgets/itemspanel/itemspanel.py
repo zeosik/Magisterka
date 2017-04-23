@@ -10,11 +10,11 @@ from editor.widgets.itemspanel.panelheader import PanelHeader
 
 class ItemsPanel(Gtk.VBox):
 
-    def __init__(self, header_name, on_row_select):
+    def __init__(self, header_name, mediator, on_row_select):
         Gtk.VBox.__init__(self)
 
         self.header = PanelHeader(header_name)
         self.pack_start(self.header, False, False, 0)
 
-        self.list_box = ListBox(on_row_select)
+        self.list_box = ListBox(mediator, on_row_select)
         self.pack_start(self.list_box, True, True, 0)

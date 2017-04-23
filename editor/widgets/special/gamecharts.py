@@ -7,10 +7,10 @@ from gi.repository import Gtk
 
 class GameCharts(Gtk.VBox):
 
-    def __init__(self):
+    def __init__(self, mediator):
         Gtk.VBox.__init__(self)
 
-        self.general_chart = GeneralChartWidget()
+        self.general_chart = GeneralChartWidget(mediator)
         self.general_chart.set_size_request(150, 0)
         self.pack_start(self.general_chart, True, True, 0)
 

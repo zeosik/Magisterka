@@ -6,6 +6,7 @@ class Mediator:
         self.on_player_select_listeners = []
         self.add_phase_listeners = []
         self.on_phase_select_listeners = []
+        self.remove_item_listeners = []
 
     # add player
     def add_player(self, player):
@@ -38,3 +39,11 @@ class Mediator:
 
     def register_on_phase_select_listener(self, listener):
         self.on_phase_select_listeners.append(listener)
+
+    # remove item
+    def remove_item(self):
+        for listener in self.remove_item_listeners:
+            listener(None)
+
+    def register_on_item_remove_listener(self, listener):
+        self.remove_item_listeners.append(listener)

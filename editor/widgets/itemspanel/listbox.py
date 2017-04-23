@@ -1,13 +1,15 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+from common.game import Game
 
 
 class ListBox(Gtk.ScrolledWindow):
 
-    def __init__(self, on_row_select):
+    def __init__(self, mediator, on_row_select):
         Gtk.ScrolledWindow.__init__(self)
 
+        self.mediator = mediator
         self.list_box = Gtk.ListBox()
         self.list_box.connect('row-activated', lambda lb, row: on_row_select(row.object))
         self.add_with_viewport(self.list_box)
@@ -32,7 +34,18 @@ class ListBox(Gtk.ScrolledWindow):
         self.list_box.show_all()
 
     def remove_item(self, button):
+        # okropny kawalek kodu, nie mamy obiektu Player/Phase wiec wydobywamy go z nazwy
+        item_name = button.row.get_children()[0].get_children()[0].get_text()
+        items = []
+        if "Phase" in item_name:
+            items = Game.phases
+        else:
+            items = Game.players
+        for item in items:
+            if item.name == item_name:
+                items.remove(item)
         self.list_box.remove(button.row)
+        self.mediator.remove_item()
         self.list_box.show_all()
 
     def clear_selection(self):

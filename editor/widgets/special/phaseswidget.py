@@ -11,7 +11,7 @@ from editor.widgets.itemspanel.itemspanel import ItemsPanel
 class PhasesWidget(ItemsPanel):
 
     def __init__(self, mediator):
-        ItemsPanel.__init__(self, 'List of Phases', mediator.select_phase)
+        ItemsPanel.__init__(self, 'List of Phases', mediator, mediator.select_phase)
 
         self.next_phase_index = 1
 

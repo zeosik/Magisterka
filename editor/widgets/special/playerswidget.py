@@ -12,7 +12,7 @@ names = ['Alice', 'Bob', 'John']
 
 class PlayersWidget(ItemsPanel):
     def __init__(self, mediator):
-        ItemsPanel.__init__(self, 'List of Players', mediator.select_player)
+        ItemsPanel.__init__(self, 'List of Players', mediator, mediator.select_player)
 
         self.next_name_index = 0
 

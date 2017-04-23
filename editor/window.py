@@ -43,7 +43,7 @@ class EditorWindow(Gtk.ApplicationWindow):
         self.left_panel.pack_start(self.phases_widget, True, True, 0)
 
         self.main_HBox.pack_start(self.left_panel, True, True, 0)
-        self.main_HBox.pack_start(GameCharts(), True, True, 0)
+        self.main_HBox.pack_start(GameCharts(self.mediator), True, True, 0)
         self.main_HBox.pack_start(PropertiesPanel(), True, True, 0)
 
         self.add(self.main_HBox)
