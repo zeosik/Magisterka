@@ -2,7 +2,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from common.game import Game
-
+from common.phase import Phase
 
 class ListBox(Gtk.ScrolledWindow):
 
@@ -34,16 +34,10 @@ class ListBox(Gtk.ScrolledWindow):
         self.list_box.show_all()
 
     def remove_item(self, button):
-        # okropny kawalek kodu, nie mamy obiektu Player/Phase wiec wydobywamy go z nazwy
-        item_name = button.row.get_children()[0].get_children()[0].get_text()
-        items = []
-        if "Phase" in item_name:
-            items = Game.phases
+        if type(button.row.object) is Phase:
+            Game.phases.remove(button.row.object)
         else:
-            items = Game.players
-        for item in items:
-            if item.name == item_name:
-                items.remove(item)
+            Game.players.remove(button.row.object)
         self.list_box.remove(button.row)
         self.mediator.remove_item()
         self.list_box.show_all()
