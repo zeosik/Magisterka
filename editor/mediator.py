@@ -1,49 +1,35 @@
 
+
 class Mediator:
 
     def __init__(self):
-        self.add_player_listeners = []
-        self.on_player_select_listeners = []
-        self.add_phase_listeners = []
-        self.on_phase_select_listeners = []
-        self.remove_item_listeners = []
+        self.players = MediatorTopic()
+        self.phases = MediatorTopic()
 
-    # add player
-    def add_player(self, player):
-        for listener in self.add_player_listeners:
-            listener(player)
 
-    def register_on_player_add_listener(self, listener):
-        self.add_player_listeners.append(listener)
+class MediatorTopic:
+    def __init__(self):
+        self.add_listeners = []
+        self.select_listeners = []
+        self.remove_listeners = []
 
-    # select player
-    def select_player(self, player):
-        for listener in self.on_player_select_listeners:
-            listener(player)
+    def add(self, value):
+        for listener in self.add_listeners:
+            listener(value)
 
-    def register_on_player_select_listener(self, listener):
-        self.on_player_select_listeners.append(listener)
+    def register_add(self, listener):
+        self.add_listeners.append(listener)
 
-    # add phase
-    def add_phase(self, phase):
-        for listener in self.add_phase_listeners:
-            listener(phase)
+    def select(self, value):
+        for listener in self.select_listeners:
+            listener(value)
 
-    def register_on_phase_add_listener(self, listener):
-        self.add_phase_listeners.append(listener)
+    def register_select(self, listener):
+        self.select_listeners.append(listener)
 
-    # select phase
-    def select_phase(self, phase):
-        for listener in self.on_phase_select_listeners:
-            listener(phase)
+    def remove(self, value):
+        for listener in self.remove_listeners:
+            listener(value)
 
-    def register_on_phase_select_listener(self, listener):
-        self.on_phase_select_listeners.append(listener)
-
-    # remove item
-    def remove_item(self):
-        for listener in self.remove_item_listeners:
-            listener(None)
-
-    def register_on_item_remove_listener(self, listener):
-        self.remove_item_listeners.append(listener)
+    def register_remove(self, listener):
+        self.remove_listeners.append(listener)

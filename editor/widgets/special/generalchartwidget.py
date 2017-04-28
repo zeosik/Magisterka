@@ -3,9 +3,6 @@ from graph_tool import Graph
 from graph_tool.draw import GraphWidget
 
 from editor.widgets.itemspanel.panelheader import PanelHeader
-from common.player import Player
-from common.phase import Phase
-from common.game import Game
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -16,24 +13,44 @@ class GeneralChartWidget(Gtk.VBox):
     def __init__(self, mediator):
         Gtk.VBox.__init__(self)
 
+        self.players = []
+        self.phases = []
+
         self.header = PanelHeader('General view')
 
         self.pack_start(self.header, False, False, 0)
 
-        mediator.register_on_player_add_listener(self.draw_chart)
-        mediator.register_on_phase_add_listener(self.draw_chart)
-        mediator.register_on_item_remove_listener(self.draw_chart)
-        
-        self.draw_chart(None)
+        mediator.players.register_add(self.on_player_add)
+        mediator.phases.register_add(self.on_phase_add)
+        mediator.players.register_remove(self.on_player_remove)
+        mediator.phases.register_remove(self.on_phase_remove)
 
-    def draw_chart(self, p):
+        self.draw_chart()
+
+    def on_player_add(self, player):
+        self.players.append(player)
+        self.draw_chart()
+
+    def on_phase_add(self, phase):
+        self.phases.append(phase)
+        self.draw_chart()
+
+    def on_player_remove(self, player):
+        self.players.remove(player)
+        self.draw_chart()
+
+    def on_phase_remove(self, phase):
+        self.phases.remove(phase)
+        self.draw_chart()
+
+    def draw_chart(self):
         self.graph = Graph()
         self.graph.vp.pos = self.graph.new_vertex_property('vector<double>')
         self.graph.vp.name = self.graph.new_vertex_property('string')
 
         self.vertexes = []
-        for player in Game.players:
-            for phase in Game.phases:
+        for player in self.players:
+            for phase in self.phases:
                 index = len(self.vertexes)
                 self.vertexes.append(self.graph.add_vertex())
                 self.graph.vp.pos[index] = [index, index]

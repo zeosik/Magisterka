@@ -2,8 +2,8 @@ class Game:
     players = []
     phases = []
 
-    def add_player(player):
-        Game.players.append(player)
+    def add_player(self, player):
+        self.players.append(player)
 
-    def add_phase(phase):
-        Game.phases.append(phase)
+    def add_phase(self, phase):
+        self.phases.append(phase)
