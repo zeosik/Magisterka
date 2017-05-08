@@ -11,7 +11,7 @@ class ListBox(Gtk.ScrolledWindow):
         self.on_row_remove = on_row_remove
 
         self.list_box = Gtk.ListBox()
-        self.list_box.connect('row-activated', lambda lb, row: on_row_select(row.object))
+        self.list_box.connect('row-activated', lambda lb, row: on_row_select(self, row.object))
         self.add_with_viewport(self.list_box)
 
     def add_item(self, object, display_name):
@@ -36,7 +36,7 @@ class ListBox(Gtk.ScrolledWindow):
     def remove_item(self, button):
         self.list_box.remove(button.row)
         self.list_box.show_all()
-        self.on_row_remove(button.row.object)
+        self.on_row_remove(self, button.row.object)
 
     def clear_selection(self):
         self.list_box.unselect_all()

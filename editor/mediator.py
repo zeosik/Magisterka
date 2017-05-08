@@ -9,27 +9,19 @@ class Mediator:
 
 class MediatorTopic:
     def __init__(self):
-        self.add_listeners = []
-        self.select_listeners = []
-        self.remove_listeners = []
+        self.add = MediatorOperation()
+        self.select = MediatorOperation()
+        self.remove = MediatorOperation()
 
-    def add(self, value):
-        for listener in self.add_listeners:
-            listener(value)
 
-    def register_add(self, listener):
-        self.add_listeners.append(listener)
+class MediatorOperation:
 
-    def select(self, value):
-        for listener in self.select_listeners:
-            listener(value)
+    def __init__(self):
+        self.listeners = []
 
-    def register_select(self, listener):
-        self.select_listeners.append(listener)
+    def register(self, listener):
+        self.listeners.append(listener)
 
-    def remove(self, value):
-        for listener in self.remove_listeners:
-            listener(value)
-
-    def register_remove(self, listener):
-        self.remove_listeners.append(listener)
+    def fire(self, sender, value):
+        for listener in self.listeners:
+            listener(sender, value)

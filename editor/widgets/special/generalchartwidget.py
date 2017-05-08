@@ -20,26 +20,26 @@ class GeneralChartWidget(Gtk.VBox):
 
         self.pack_start(self.header, False, False, 0)
 
-        mediator.players.register_add(self.on_player_add)
-        mediator.phases.register_add(self.on_phase_add)
-        mediator.players.register_remove(self.on_player_remove)
-        mediator.phases.register_remove(self.on_phase_remove)
+        mediator.players.add.register(self.on_player_add)
+        mediator.phases.add.register(self.on_phase_add)
+        mediator.players.remove.register(self.on_player_remove)
+        mediator.phases.remove.register(self.on_phase_remove)
 
         self.draw_chart()
 
-    def on_player_add(self, player):
+    def on_player_add(self, sender, player):
         self.players.append(player)
         self.draw_chart()
 
-    def on_phase_add(self, phase):
+    def on_phase_add(self, sender, phase):
         self.phases.append(phase)
         self.draw_chart()
 
-    def on_player_remove(self, player):
+    def on_player_remove(self, sender, player):
         self.players.remove(player)
         self.draw_chart()
 
-    def on_phase_remove(self, phase):
+    def on_phase_remove(self, sender, phase):
         self.phases.remove(phase)
         self.draw_chart()
 
