@@ -1,19 +1,19 @@
 import gi
 
+from editor.namegenerator.name_generator import NameGenerator
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from common.player import Player
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
-names = ['Alice', 'Bob', 'John']
-
 
 class PlayersWidget(ItemsPanel):
     def __init__(self, mediator):
         ItemsPanel.__init__(self, 'List of Players', mediator.players.remove.fire, mediator.players.select.fire)
 
-        self.next_name_index = 0
+        self.name_generator = NameGenerator('Player')
 
         self.mediator = mediator
         self.mediator.players.add.register(self.on_player_add)
@@ -26,8 +26,7 @@ class PlayersWidget(ItemsPanel):
         self.header.add_button(add_button)
 
     def add_player_button_click(self, button):
-        player = Player(names[self.next_name_index])
-        self.next_name_index = (self.next_name_index + 1) % len(names)
+        player = Player(self.name_generator.next_name())
         self.mediator.players.add.fire(self, player)
 
     def on_player_add(self, sender, player):
