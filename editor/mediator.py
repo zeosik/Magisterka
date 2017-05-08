@@ -3,7 +3,7 @@
 class Mediator:
 
     def __init__(self):
-        self.players = MediatorTopic()
+        self.players_groups = MediatorTopic()
         self.phases = MediatorTopic()
 
 

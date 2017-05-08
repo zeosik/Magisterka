@@ -17,8 +17,8 @@ class PhasesWidget(ItemsPanel):
         self.name_generator = NameGenerator('Phase')
 
         self.mediator = mediator
-        self.mediator.players.add.register(self.clear_selection)
-        self.mediator.players.select.register(self.clear_selection)
+        self.mediator.players_groups.add.register(self.clear_selection)
+        self.mediator.players_groups.select.register(self.clear_selection)
         self.mediator.phases.add.register(self.on_phase_add)
 
         add_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_ADD))
