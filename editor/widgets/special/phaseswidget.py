@@ -5,7 +5,7 @@ from editor.namegenerator.name_generator import NameGenerator
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from common.phase import Phase
+from common.model.phase import Phase
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
 
@@ -17,8 +17,8 @@ class PhasesWidget(ItemsPanel):
         self.name_generator = NameGenerator('Phase')
 
         self.mediator = mediator
-        self.mediator.players_groups.add.register(self.clear_selection)
-        self.mediator.players_groups.select.register(self.clear_selection)
+        self.mediator.player_types.add.register(self.clear_selection)
+        self.mediator.player_types.select.register(self.clear_selection)
         self.mediator.phases.add.register(self.on_phase_add)
 
         add_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_ADD))
