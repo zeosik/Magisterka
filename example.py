@@ -1,30 +1,22 @@
-from random import randint
-
 from common.articaft_generators.cardgenerator import CardGenerator
 from common.model.artifacts.card import CardColor
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
 from common.model.places.place import Place
 from common.model.playertype import PlayerType
+from common.model.player import Player, SelectPlayer
 from common.model.rules.changephase import ChangePhase
+from common.model.rules.wincheck import WinCheck
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.move import Move
 from common.model.rules.shuffle import Shuffle
 
-
-def WinCheck(phase, phase_end):
-    rand = randint(0, 5)    #symuluje rozgrywke i to, ze w pewnym momencie ktoś wygra
-    if rand == 0:
-        return phase_end
-    else:
-        return phase
-
 def current_player_for_type(player_type):
     pass
 
-class FOO:
-    def __init__(self, name):
-        self.name = name
+#class FOO:
+#    def __init__(self, name):
+#        self.name = name
 
 def example_5_10_15():
 
@@ -37,8 +29,8 @@ def example_5_10_15():
     player_type.max_players = 10
 
     #?
-    TABLE_PLAYER = FOO('table-player')
-    player = FOO('player')
+    TABLE_PLAYER = SelectPlayer.TablePlayer #FOO('table-player')
+    player = SelectPlayer.EachPlayer #FOO('player')
 
     # rekwizyty
     cards = CardGenerator.cards(min_rank=1, max_rank=10, colors=list(CardColor))
@@ -61,9 +53,9 @@ def example_5_10_15():
     #list<Player>, int -> int
     #Może jakas klasa? PlayerChoose?
     #firstPlayer = lambda players_list, current_index: 1
-    firstPlayer = FOO('first-player')
+    firstPlayer = SelectPlayer.FirstPlayer #FOO('first-player')
     #nextPlayer = lambda players_list, current_index: (current_index + 1) % len(players_list)
-    nextPlayer = FOO('next_player')
+    nextPlayer = SelectPlayer.NextPlayer #FOO('next_player')
 
     phase_start.rules.append(Shuffle(TABLE_PLAYER, deck))
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
@@ -74,7 +66,7 @@ def example_5_10_15():
 
     #faza - wybor gracza
     phase_choose_player.rules.append(ChangePhase(phase1, nextPlayer))
-    phase_win_check.rules.append(lambda: WinCheck(phase_choose_player, phase_end))
+    phase_win_check.rules.append(WinCheck(phase_choose_player, phase_end))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool
@@ -83,7 +75,7 @@ def example_5_10_15():
 
     #coś wtym stylu
     CURRENT_PLAYER = current_player_for_type(player_type)
-    CURRENT_PLAYER = FOO('current-player')
+    CURRENT_PLAYER = SelectPlayer.CurrentPlayer #FOO('current-player')
     phase1.rules.append(Move(CURRENT_PLAYER, player_hand, TABLE_PLAYER, discard_pile, number_of_cards='any?', condition=sums_to_5_10_15))
     phase1.rules.append(ChangePhase(phase_win_check, TABLE_PLAYER))
 
