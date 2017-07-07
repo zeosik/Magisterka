@@ -11,6 +11,16 @@ class SimulatorEngine():
         self.log = logging.getLogger(self.__class__.__name__)
         self.game = game
 
+    def print_state(self):
+        self.log.debug("Stan gry:")
+
+        all_places = self.game.table_type.places
+        for player_type in self.game.player_types:
+            all_places += player_type.places
+
+        for place in all_places:
+            self.log.debug("-" + place.name + ": " + " ".join(map(str, place.artifacts)))
+
     def run(self):
         self.log.debug("Uruchamiam symulacje gry: " + self.game.name)
 
@@ -35,6 +45,7 @@ class SimulatorEngine():
             self.log.debug("-Przechodze do fazy: " + current_phase.name)
 
         self.log.debug("Koncze symulacje")
+        self.print_state()
 
 def run():
     engine = SimulatorEngine(example_5_10_15())
