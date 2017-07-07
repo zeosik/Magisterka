@@ -10,6 +10,7 @@ class GameModel:
 
         self.starting_player = None
         self.start_phase = None
+        self.end_phase = None
 
     def add_player_type(self, player_type: PlayerType):
         self.player_types.append(player_type)
