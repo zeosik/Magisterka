@@ -39,12 +39,13 @@ class SimulatorEngine():
     def print_state(self):
         self.log.debug("Stan gry:")
 
-        all_places = self.game.table_type.places
-        for player_type in self.game.player_types:
-            all_places += player_type.places
-
-        for place in all_places:
+        for place in self.players[self.game.table_type].places:
             self.log.debug("-" + place.name + ": " + " ".join(map(str, place.artifacts)))
+
+        for player_type in self.game.player_types:
+            for player in self.players[player_type]:
+                for place in player.places:
+                    self.log.debug("-" + player.name + ":" + place.name + ": " + " ".join(map(str, place.artifacts)))
 
     def swich_phase(self, phase):
         self.current_phase = phase
@@ -59,6 +60,7 @@ class SimulatorEngine():
         self.log.debug("Tura gracza: " + player.name)
 
     def run(self):
+        self.print_state()
         self.log.debug("Uruchamiam symulacje gry: " + self.game.name)
         self.log.debug("Tura gracza: " + self.players[self.game.table_type].name)
         self.log.debug("-Przechodze do fazy: " + self.current_phase.name)
@@ -67,7 +69,7 @@ class SimulatorEngine():
 
             for rule in self.current_phase.rules:
                 self.log.debug("--Przetwarzam regule: " + rule.name)
-                rule.doStuff()
+                rule.apply()
 
                 if type(rule) is ChangePhase:
                     self.swich_phase(rule.phase)

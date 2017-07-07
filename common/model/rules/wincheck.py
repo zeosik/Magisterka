@@ -8,7 +8,7 @@ class WinCheck(Rule):
         self.phase = next_phase
         self.win_phase = win_phase
 
-    def doStuff(self):
+    def apply(self):
         self.counter -= 1
         if self.counter == 0:
             self.phase = self.win_phase

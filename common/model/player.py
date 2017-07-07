@@ -1,4 +1,5 @@
 from enum import Enum
+import copy
 from common.model.playertype import PlayerType
 
 class SelectPlayer(Enum):
@@ -13,3 +14,4 @@ class Player:
     def __init__(self, name, player_type: PlayerType):
         self.name = name
         self.type = player_type
+        self.places = copy.deepcopy(player_type.places)
