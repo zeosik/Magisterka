@@ -8,6 +8,13 @@ class SelectPlayer(Enum):
     CurrentPlayer = 3
     EachPlayer = 4
     TablePlayer = 5
+    AtIndex = 6
+
+class PlayerChooser():
+    def __init__(self, enum: SelectPlayer, type: PlayerType, index = None):
+        self.enum = enum
+        self.type = type
+        self.index = index
 
 class Player:
 
