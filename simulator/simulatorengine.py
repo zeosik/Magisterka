@@ -10,6 +10,9 @@ from common.model.player import Player, SelectPlayer
 from common.model.playertype import PlayerType
 
 #tymczasowe generowanie graczy
+from simulator.gamestate import simpleGameWithOnePlayerType, GameState
+
+
 def get_players_for_types(player_types, num_each_type, table_type):
     players_for_types = dict()
     for player_type in player_types:
@@ -21,77 +24,68 @@ def get_players_for_types(player_types, num_each_type, table_type):
     return players_for_types
 
 class SimulatorEngine():
-    def __init__(self, game: GameModel):
+    def __init__(self, gamestate: GameState):
         self.log = logging.getLogger(self.__class__.__name__)
-        self.game = game
-        self.current_phase = self.game.start_phase
-
-        #self.players to jest słownik z tablicami graczy
-        #czyli mamy np self.players['players'] i tam są gracze 'player0' i 'player1'
-        #dla self.players['table-player'] nie ma tablicy, tylko pojedynczy gracz 'table'
-        #Nie wiem jak to lepiej przechowywać, jak masz jakiś pomysł to śmiało
-        self.players = get_players_for_types(self.game.player_types, 2, self.game.table_type)
-
-        # stół nie może być graczem, bo przy wartości "NextPlayer" się zgubimy (nie wiemy kto grał wcześniej)
-        self.current_player = None
-        self.is_table_turn = True
+        self.gamestate = gamestate
 
     def print_state(self):
         self.log.debug("Stan gry:")
 
-        for place in self.players[self.game.table_type].places:
+        for place in self.gamestate.table_player().places:
             self.log.debug("-" + place.name + ": " + " ".join(map(str, place.artifacts)))
 
-        for player_type in self.game.player_types:
-            for player in self.players[player_type]:
+        for player_type in self.gamestate.model.player_types:
+            for player in self.gamestate.type_players_dict[player_type]:
                 for place in player.places:
                     self.log.debug("-" + player.name + ":" + place.name + ": " + " ".join(map(str, place.artifacts)))
 
-    def swich_phase(self, phase):
-        self.current_phase = phase
-        self.log.debug("-Przechodze do fazy: " + self.current_phase.name)
+    #def swich_phase(self, phase):
+    #    self.current_phase = phase
+    #    self.log.debug("-Przechodze do fazy: " + self.current_phase.name)
 
-    def swich_player(self, player):
-        if player == self.players[self.game.table_type]:
-            self.is_table_turn = True
-        else:
-            self.is_table_turn = False
-            self.current_player = player
-        self.log.debug("Tura gracza: " + player.name)
+    #def swich_player(self, player):
+#        if player == self.gamestate.type_players_dict[self.gamestate.model.table_type]:
+#            self.is_table_turn = True
+#        else:
+#            self.is_table_turn = False
+#            self.current_player = player
+#        self.log.debug("Tura gracza: " + player.name)
 
     def run(self):
         self.print_state()
-        self.log.debug("Uruchamiam symulacje gry: " + self.game.name)
-        self.log.debug("Tura gracza: " + self.players[self.game.table_type].name)
-        self.log.debug("-Przechodze do fazy: " + self.current_phase.name)
+        self.log.debug("Uruchamiam symulacje gry: " + self.gamestate.model.name)
+        self.log.debug("Tura gracza: " + self.gamestate.current_player().name)
+        self.log.debug("-Przechodze do fazy: " + self.gamestate.current_phase().name)
 
-        while self.current_phase != self.game.end_phase:
+        while not self.gamestate.is_current_phase_end_game_phase():
 
-            for rule in self.current_phase.rules:
+            for rule in self.gamestate.current_phase().rules:
                 self.log.debug("--Przetwarzam regule: " + rule.name)
                 rule.apply()
 
                 if type(rule) is ChangePhase:
-                    self.swich_phase(rule.phase)
+                    #self.gamestate.switch_phase(rule.phase)
 
                     if (rule.player == SelectPlayer.FirstPlayer):
-                        self.swich_player(self.players[self.game.player_types[0]][0])
+                        self.gamestate.switch_player(self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0], rule.phase)
 
-                    elif (rule.player == SelectPlayer.NextPlayer):                        
-                        p_type = self.current_player.type
-                        p_index = self.players[p_type].index(self.current_player)
-                        num_players = len(self.players[p_type])
-                        self.swich_player(self.players[p_type][(p_index+1) % num_players])
+                    elif (rule.player == SelectPlayer.NextPlayer):
+                        #TODO narazie takie obejscie
+                        p_type = self.gamestate.model.player_types[0]
+                        p_index = self.gamestate.current_player_index_for_type(p_type)
+                        num_players = len(self.gamestate.type_players_dict[p_type])
+                        self.gamestate.switch_player(self.gamestate.type_players_dict[p_type][(p_index+1) % num_players], rule.phase)
 
                     elif (rule.player == SelectPlayer.TablePlayer):
-                        self.swich_player(self.players[self.game.table_type])
+                        self.gamestate.switch_player(self.gamestate.table_player(), rule.phase)
 
                 elif type(rule) is WinCheck:
-                   self.swich_phase(rule.phase)
+                   self.gamestate.switch_phase(rule.phase)
 
         self.log.debug("Koncze symulacje")
         self.print_state()
 
 def run():
-    engine = SimulatorEngine(example_5_10_15())
+    game = simpleGameWithOnePlayerType(example_5_10_15(), 3)
+    engine = SimulatorEngine(game)
     engine.run()

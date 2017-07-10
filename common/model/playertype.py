@@ -9,10 +9,10 @@ class PlayerType:
         self.phases = []
         self.places = []
 
-    def add_phase(self, phase: Phase):
+    def add_phase(self, phase: Phase) -> Phase:
         self.phases.append(phase)
         return phase
 
-    def add_place(self, place: Place):
+    def add_place(self, place: Place) -> Place:
         self.places.append(place)
         return place
