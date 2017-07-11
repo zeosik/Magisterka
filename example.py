@@ -1,8 +1,11 @@
 from common.articaft_generators.cardgenerator import CardGenerator
-from common.model.PlayerChooser.currentplayerchoose import CurrentPlayerChooser
+from common.model.PlayerChooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.PlayerChooser.firstplayerchooser import FirstPlayerChooser
 from common.model.PlayerChooser.nextplayerchooser import NextPlayerChooser
 from common.model.PlayerChooser.tableplayerchooser import TablePlayerChooser
+from common.model.cardpicker.cardpicker import CardPicker
+from common.model.cardpicker.topcardpicker import TopCardPicker
+from common.model.cardpicker.playerinputpicker import PlayerInputPicker
 from common.model.artifacts.card import CardColor
 from common.model.conditions.ifcounter import IfCounter
 from common.model.gamemodel import GameModel
@@ -48,7 +51,7 @@ def example_5_10_15():
     phase_start.rules.append(Shuffle(TablePlayerChooser(), deck))
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
-    give_5_cards = lambda playerChooser: Move(TablePlayerChooser(), deck, playerChooser, player_hand, number_of_cards=5)
+    give_5_cards = lambda playerChooser: Move(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPicker(5))
     phase_start.rules.append(ForEachPlayer(player_type, give_5_cards))
     phase_start.rules.append(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
@@ -62,7 +65,7 @@ def example_5_10_15():
     sums_to_5_10_15 = lambda from_place, to_place, moved_cards: moved_cards.ranks_sum() in [5,10,15]
     #w makao bedzie coś w stylu moved_cards[0].color == to_place.top_card.color
 
-    phase1.rules.append(Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, number_of_cards='any?', condition=sums_to_5_10_15))
+    phase1.rules.append(Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputPicker("any"), condition=sums_to_5_10_15))
     phase1.rules.append(ChangePhase(phase_win_check, TablePlayerChooser()))
 
     return game
