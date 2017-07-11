@@ -1,7 +1,7 @@
 from simulator.gamestate import GameState
 
 
-class Condition:
+class IfCondition:
 
     def __init__(self, name):
         self.name = name

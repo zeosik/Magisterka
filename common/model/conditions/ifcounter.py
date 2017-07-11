@@ -1,8 +1,8 @@
-from common.model.conditions.condition import Condition
+from common.model.conditions.ifcondition import IfCondition
 from simulator.gamestate import GameState
 
 
-class Counter(Condition):
+class IfCounter(IfCondition):
 
     def __init__(self, evaluate_to_false_after):
         super().__init__('counter {0}'.format(evaluate_to_false_after))

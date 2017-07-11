@@ -4,7 +4,7 @@ from common.model.PlayerChooser.firstplayerchooser import FirstPlayerChooser
 from common.model.PlayerChooser.nextplayerchooser import NextPlayerChooser
 from common.model.PlayerChooser.tableplayerchooser import TablePlayerChooser
 from common.model.artifacts.card import CardColor
-from common.model.conditions.counter import Counter
+from common.model.conditions.ifcounter import IfCounter
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
 from common.model.places.place import Place
@@ -55,7 +55,7 @@ def example_5_10_15():
     #faza - wybor gracza
     to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
     phase_choose_player.rules.append(to_player_turn)
-    phase_win_check.rules.append(If(Counter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
+    phase_win_check.rules.append(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool
