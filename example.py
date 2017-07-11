@@ -4,13 +4,14 @@ from common.model.PlayerChooser.firstplayerchooser import FirstPlayerChooser
 from common.model.PlayerChooser.nextplayerchooser import NextPlayerChooser
 from common.model.PlayerChooser.tableplayerchooser import TablePlayerChooser
 from common.model.artifacts.card import CardColor
+from common.model.conditions.counter import Counter
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
 from common.model.places.place import Place
 from common.model.playertype import PlayerType
 from common.model.player import Player
 from common.model.rules.changephase import ChangePhase
-from common.model.rules.wincheck import WinCheck
+from common.model.rules.ifrule import If
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.move import Move
 from common.model.rules.shuffle import Shuffle
@@ -52,8 +53,9 @@ def example_5_10_15():
     phase_start.rules.append(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
     #faza - wybor gracza
-    phase_choose_player.rules.append(ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type))))
-    phase_win_check.rules.append(WinCheck(phase_choose_player, phase_end))
+    to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+    phase_choose_player.rules.append(to_player_turn)
+    phase_win_check.rules.append(If(Counter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool

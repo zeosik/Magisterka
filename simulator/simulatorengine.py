@@ -1,13 +1,6 @@
 import logging
 
-from common.model.gamemodel import GameModel
-from common.model.rules.changephase import ChangePhase
-from common.model.rules.wincheck import WinCheck
-from common.model.rules.rule import Rule
 from example import example_5_10_15
-from common.model.phase import Phase
-from common.model.player import Player
-from common.model.playertype import PlayerType
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 
 class SimulatorEngine():
@@ -37,9 +30,6 @@ class SimulatorEngine():
             for rule in self.gamestate.current_phase().rules:
                 self.log.debug("--Przetwarzam regule: " + rule.name)
                 rule.apply(self.gamestate)
-
-                if type(rule) is WinCheck:
-                   self.gamestate.switch_phase(rule.phase)
 
         self.log.debug("Koncze symulacje")
         self.print_state()
