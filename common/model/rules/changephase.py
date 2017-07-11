@@ -1,9 +1,18 @@
+from common.model.PlayerChooser.playerchooser import PlayerChooser
 from common.model.phase import Phase
 from common.model.rules.rule import Rule
+from simulator.gamestate import GameState
 
 
 class ChangePhase(Rule):
-    def __init__(self, to_phase:Phase, player):
-        super().__init__('Change phase to: {0} {1}'.format(to_phase.name, player.enum.name))
+    def __init__(self, to_phase:Phase, player_chooser: PlayerChooser):
+        super().__init__('Change phase to: {0} {1}'.format(to_phase.name, player_chooser.name))
         self.phase = to_phase
-        self.player = player
+        self.player_chooser = player_chooser
+
+    def apply(self, gamestate: GameState):
+        player = self.player_chooser.player(gamestate)
+        if gamestate.current_player() != player:
+            gamestate.switch_player(player, self.phase)
+        else:
+            gamestate.switch_phase(self.phase)

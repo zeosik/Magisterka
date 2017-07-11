@@ -2,20 +2,6 @@ from enum import Enum
 import copy
 from common.model.playertype import PlayerType
 
-class SelectPlayer(Enum):
-    FirstPlayer = 1
-    NextPlayer = 2
-    CurrentPlayer = 3
-    EachPlayer = 4
-    TablePlayer = 5
-    AtIndex = 6
-
-class PlayerChooser():
-    def __init__(self, enum: SelectPlayer, type: PlayerType, index = None):
-        self.enum = enum
-        self.type = type
-        self.index = index
-
 class Player:
 
     def __init__(self, name, player_type: PlayerType):

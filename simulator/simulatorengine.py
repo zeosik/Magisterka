@@ -6,7 +6,7 @@ from common.model.rules.wincheck import WinCheck
 from common.model.rules.rule import Rule
 from example import example_5_10_15
 from common.model.phase import Phase
-from common.model.player import Player, SelectPlayer, PlayerChooser
+from common.model.player import Player
 from common.model.playertype import PlayerType
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 
@@ -38,23 +38,7 @@ class SimulatorEngine():
                 self.log.debug("--Przetwarzam regule: " + rule.name)
                 rule.apply(self.gamestate)
 
-                if type(rule) is ChangePhase:
-                    #self.gamestate.switch_phase(rule.phase)
-
-                    if (rule.player.enum == SelectPlayer.FirstPlayer):
-                        self.gamestate.switch_player(self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0], rule.phase)
-
-                    elif (rule.player.enum == SelectPlayer.NextPlayer):
-                        #TODO narazie takie obejscie
-                        p_type = rule.player.type
-                        p_index = self.gamestate.current_player_index_for_type(p_type)
-                        num_players = len(self.gamestate.type_players_dict[p_type])
-                        self.gamestate.switch_player(self.gamestate.type_players_dict[p_type][(p_index+1) % num_players], rule.phase)
-
-                    elif (rule.player.enum == SelectPlayer.TablePlayer):
-                        self.gamestate.switch_player(self.gamestate.table_player(), rule.phase)
-
-                elif type(rule) is WinCheck:
+                if type(rule) is WinCheck:
                    self.gamestate.switch_phase(rule.phase)
 
         self.log.debug("Koncze symulacje")

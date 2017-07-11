@@ -1,15 +1,16 @@
 import logging
 
+from common.model.PlayerChooser.playerchooser import PlayerChooser
 from common.model.places.place import Place
 from common.model.playertype import PlayerType
-from common.model.player import PlayerChooser
 from common.model.rules.cardoperationrule import CardOperationRule
 from common.model.artifacts.card import Card
 
 class Move(CardOperationRule):
 
     def __init__(self, from_player: PlayerChooser, from_place: Place, to_player: PlayerChooser, to_place:Place, number_of_cards, condition = None):
-        super().__init__("Move from {0}:{1} to {2}:{3}".format(from_player.enum.name, from_place.name, to_player.enum.name, to_place.name))
+        super().__init__("Move from {0}:{1} to {2}:{3}".format(from_player.name, from_place.name, to_player.name, to_place.name))
+        self.log = logging.getLogger(self.__class__.__name__)
         self.from_player = from_player
         self.from_place = from_place
         self.to_player = to_player
@@ -23,8 +24,8 @@ class Move(CardOperationRule):
             #TODO obsługa wejścia?
             return
 
-        real_player_from = self.find_player(gamestate, self.from_player)
-        real_player_to = self.find_player(gamestate, self.to_player)
+        real_player_from = self.from_player.player(gamestate)
+        real_player_to = self.to_player.player(gamestate)
 
         real_place_from = self.find_place(real_player_from, self.from_place.name)
         real_place_to = self.find_place(real_player_to, self.to_place.name)

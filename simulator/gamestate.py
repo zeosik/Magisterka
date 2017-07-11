@@ -25,6 +25,9 @@ class GameState:
                 self.player_current_phase[player] = None
         self.player_current_phase[self.current_player()] = model.start_phase
 
+    def players_for_type(self, type: PlayerType) -> list:
+        return self.type_players_dict[type]
+
     def current_player_for_type(self, player_type: PlayerType) -> Player:
         return self.type_players_dict[player_type][self.current_player_index_for_type(player_type)]
 
