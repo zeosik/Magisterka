@@ -8,6 +8,9 @@ class CardColor(Enum):
     Hearts = 3 #serce
     Spades = 4 #pik
 
+class UnknownCard(Artifact):
+    def __str__(self):
+        return "??"
 
 class Card(Artifact):
 

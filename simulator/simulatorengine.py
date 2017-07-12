@@ -8,19 +8,24 @@ class SimulatorEngine():
         self.log = logging.getLogger(self.__class__.__name__)
         self.gamestate = gamestate
 
-    def print_state(self):
-        self.log.debug("Stan gry:")
-
+    def get_places(self, player_arg = None):
+        all_places = dict()
         for place in self.gamestate.table_player().places:
-            self.log.debug("-" + place.name + ": " + " ".join(map(str, place.artifacts)))
+            name = self.gamestate.table_player().name + ":" + place.name
+            all_places[name] = place.get_cards(player_arg)
 
         for player_type in self.gamestate.model.player_types:
             for player in self.gamestate.type_players_dict[player_type]:
                 for place in player.places:
-                    self.log.debug("-" + player.name + ":" + place.name + ": " + " ".join(map(str, place.artifacts)))
+                    all_places[player.name + ":" + place.name] = place.get_cards(player_arg)
+        return all_places
+
+    def print_places(self, places):
+        for place in sorted(places):
+            print (place + ": " + " ".join(map(str, places[place])))
 
     def run(self):
-        self.print_state()
+        self.print_places(self.get_places())
         self.log.debug("Uruchamiam symulacje gry: " + self.gamestate.model.name)
         self.log.debug("Tura gracza: " + self.gamestate.current_player().name)
         self.log.debug("-Przechodze do fazy: " + self.gamestate.current_phase().name)
@@ -32,7 +37,9 @@ class SimulatorEngine():
                 rule.apply(self.gamestate)
 
         self.log.debug("Koncze symulacje")
-        self.print_state()
+        self.print_places(self.get_places())
+        test_player = self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0]
+        self.print_places(self.get_places(test_player))
 
 def run():
     game = simpleGameWithOnePlayerType(example_5_10_15(), 3)

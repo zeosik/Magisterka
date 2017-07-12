@@ -10,7 +10,9 @@ from common.model.artifacts.card import CardColor
 from common.model.conditions.ifcounter import IfCounter
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
-from common.model.places.place import Place
+from common.model.places.cardpile import CardPile
+from common.model.places.cardline import CardLine
+from common.model.places.cardplace import CardVisibility
 from common.model.playertype import PlayerType
 from common.model.player import Player
 from common.model.rules.changephase import ChangePhase
@@ -33,9 +35,9 @@ def example_5_10_15():
     cards = CardGenerator.cards(min_rank=1, max_rank=10, colors=list(CardColor))
 
     #miejsca
-    player_hand = player_type.add_place(Place('hand'))
-    deck = table_type.add_place(Place('deck', starting_artifacts=cards))
-    discard_pile = table_type.add_place(Place('discard pile'))
+    player_hand = player_type.add_place(CardLine('hand', CardVisibility.Player))
+    deck = table_type.add_place(CardPile('deck', CardVisibility.Nobody, starting_artifacts=cards))
+    discard_pile = table_type.add_place(CardPile('discard pile', CardVisibility.All))
 
     #fazy
     phase_start = table_type.add_phase(Phase('start'))

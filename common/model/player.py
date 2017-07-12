@@ -8,3 +8,5 @@ class Player:
         self.name = name
         self.type = player_type
         self.places = copy.deepcopy(player_type.places)
+        for place in self.places:
+            place.set_player(self)
