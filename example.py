@@ -49,25 +49,25 @@ def example_5_10_15():
 
     #faza - rozdanie poczatkowe
 
-    phase_start.rules.append(Shuffle(TablePlayerChooser(), deck))
+    phase_start.rule = Shuffle(TablePlayerChooser(), deck)
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
     give_5_cards = lambda playerChooser: Move(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPicker(5))
-    phase_start.rules.append(ForEachPlayer(player_type, give_5_cards))
-    phase_start.rules.append(ChangePhase(phase1, FirstPlayerChooser(player_type)))
+    phase_start.rule.next = ForEachPlayer(player_type, give_5_cards)
+    phase_start.rule.next.next = ChangePhase(phase1, FirstPlayerChooser(player_type))
 
     #faza - wybor gracza
     to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-    phase_choose_player.rules.append(to_player_turn)
-    phase_win_check.rules.append(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
+    phase_choose_player.rule = to_player_turn
+    phase_win_check.rule = If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser()))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool
     sums_to_5_10_15 = lambda from_place, to_place, moved_cards: moved_cards.ranks_sum() in [5,10,15]
     #w makao bedzie coś w stylu moved_cards[0].color == to_place.top_card.color
 
-    phase1.rules.append(Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputPicker("any"), condition=sums_to_5_10_15))
-    phase1.rules.append(ChangePhase(phase_win_check, TablePlayerChooser()))
+    phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputPicker("any"), condition=sums_to_5_10_15)
+    phase1.rule.next = ChangePhase(phase_win_check, TablePlayerChooser())
 
     return game
 

@@ -32,9 +32,11 @@ class SimulatorEngine():
 
         while not self.gamestate.is_current_phase_end_game_phase():
 
-            for rule in self.gamestate.current_phase().rules:
-                self.log.debug("--Przetwarzam regule: " + rule.name)
-                rule.apply(self.gamestate)
+            current_rule = self.gamestate.current_phase().rule
+            while (current_rule):
+                self.log.debug("--Przetwarzam regule: " + current_rule.name)
+                current_rule.apply(self.gamestate)
+                current_rule = current_rule.next
 
         self.log.debug("Koncze symulacje")
         self.print_places(self.get_places())
