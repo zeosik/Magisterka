@@ -3,22 +3,23 @@ from common.model.PlayerChooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.PlayerChooser.firstplayerchooser import FirstPlayerChooser
 from common.model.PlayerChooser.nextplayerchooser import NextPlayerChooser
 from common.model.PlayerChooser.tableplayerchooser import TablePlayerChooser
+from common.model.artifacts.card import CardColor
 from common.model.cardpicker.cardpicker import CardPicker
 from common.model.cardpicker.topcardpicker import TopCardPicker
-from common.model.cardpicker.playerinputpicker import PlayerInputPicker
-from common.model.artifacts.card import CardColor
 from common.model.conditions.ifcounter import IfCounter
+from common.model.conditions.moveconditions.cardssumsto import CardsSumsTo
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
-from common.model.places.cardpile import FaceDownCardPile, FaceUpCardPile
+from common.model.placepicker.placepicker import PlacePicker
 from common.model.places.cardline import PlayerCardLine
+from common.model.places.cardpile import FaceDownCardPile, FaceUpCardPile
 from common.model.playertype import PlayerType
-from common.model.player import Player
 from common.model.rules.changephase import ChangePhase
-from common.model.rules.ifrule import If
 from common.model.rules.foreachplayer import ForEachPlayer
+from common.model.rules.ifrule import If
 from common.model.rules.move import Move
 from common.model.rules.shuffle import Shuffle
+
 
 def example_5_10_15():
 
@@ -52,7 +53,8 @@ def example_5_10_15():
     phase_start.rule = Shuffle(TablePlayerChooser(), deck)
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
-    give_5_cards = lambda playerChooser: Move(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPicker(5))
+    #give_5_cards = lambda playerChooser: OldMove(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPickerOld(5))
+    give_5_cards = lambda playerChooser: Move(TopCardPicker(5, PlacePicker(TablePlayerChooser(), deck), PlacePicker(playerChooser, player_hand)))
     phase_start.rule.next = ForEachPlayer(player_type, give_5_cards)
     phase_start.rule.next.next = ChangePhase(phase1, FirstPlayerChooser(player_type))
 
@@ -66,7 +68,12 @@ def example_5_10_15():
     sums_to_5_10_15 = lambda from_place, to_place, moved_cards: moved_cards.ranks_sum() in [5,10,15]
     #w makao bedzie coś w stylu moved_cards[0].color == to_place.top_card.color
 
-    phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputPicker("any"), condition=sums_to_5_10_15)
+
+    source_place_picker = PlacePicker(CurrentPlayerChooser(player_type), player_hand)
+    target_place_picker = PlacePicker(TablePlayerChooser(), discard_pile)
+    picp = CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))
+    #phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputCardPicker("any"), condition=sums_to_5_10_15)
+    phase1.rule = Move(picp)
     phase1.rule.next = ChangePhase(phase_win_check, TablePlayerChooser())
 
     return game

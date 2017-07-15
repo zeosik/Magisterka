@@ -12,7 +12,26 @@ class ForEachPlayer(Rule):
         self.player_type = in_player_type
         self.create_action_func = create_action_function
 
+        self.player_iterator = None
+        self.current_player = None
+        self.orginal_next = None
+
     def apply(self, gamestate):
-        for player in gamestate.players_for_type(self.player_type):
-            action = self.create_action_func(ConstantPlayerChooser(player))
-            action.apply(gamestate)
+        #czy zaczynamy iteracje
+        if self.player_iterator is None:
+            self.player_iterator = iter(gamestate.players_for_type(self.player_type))
+            self.orginal_next = self.next
+
+        try:
+            self.current_player = next(self.player_iterator)
+        except StopIteration:
+            #przywracamy nastepna regule
+            self.next = self.orginal_next
+
+            self.player_iterator = None
+            self.current_player = None
+            self.orginal_next = None
+        else:
+            rule = self.create_action_func(ConstantPlayerChooser(self.current_player))
+            rule.next = self
+            self.next = rule

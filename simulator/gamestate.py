@@ -2,6 +2,7 @@ import logging
 
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
+from common.model.places.place import Place
 from common.model.player import Player
 from common.model.playertype import PlayerType
 
@@ -24,6 +25,15 @@ class GameState:
             for player in players:
                 self.player_current_phase[player] = None
         self.player_current_phase[self.current_player()] = model.start_phase
+
+    def actual_place(self, player:Player, to_find_place: Place):
+        for place in player.places:
+            if to_find_place.name == place.name:
+                return place
+        self.log.error('could not find place: {0} for player: {1}'.format(to_find_place.name, player.name))
+
+    def is_current_player_table_player(self):
+        return self.current_player() == self.table_player()
 
     def players_for_type(self, type: PlayerType) -> list:
         return self.type_players_dict[type]

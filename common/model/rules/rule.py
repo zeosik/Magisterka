@@ -8,3 +8,6 @@ class Rule:
 
     def apply(self, gamestate: GameState):
         pass
+
+    def player_inputs(self) -> list: #List[PlayerInput]
+        return []
