@@ -29,5 +29,3 @@ class CardPicker(PlayerInput):
             return False, 'did not match condition: {0}'.format(self.condition.name)
         return super().submit_choices(choices)
 
-    def cards(self, place: Place) -> []:
-        pass

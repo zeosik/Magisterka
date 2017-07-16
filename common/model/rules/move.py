@@ -1,11 +1,10 @@
 import logging
 
 from common.model.cardpicker.cardpicker import CardPicker
-from common.model.rules.cardoperationrule import CardOperationRule
+from common.model.rules.rule import Rule
 from simulator.gamestate import GameState
 
-
-class Move(CardOperationRule):
+class Move(Rule):
 
     def __init__(self, card_picker: CardPicker):
         #super().__init__("Move from {0}:{1} to {2}:{3}".format(from_player.name, from_place.name, to_player.name, to_place.name))
