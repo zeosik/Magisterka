@@ -1,4 +1,4 @@
-import logging
+import logging, itertools
 
 from common.model import PlayerInput
 from common.model.player import Player
@@ -29,6 +29,13 @@ class SimulatorEngine():
     def print_places_for_player(self, player: Player):
         self.print_places(self.get_places(player))
 
+    def find_players(self):
+        #tutaj serwer zgłasza jacy gracze będą grali w gre
+        players = self.gamestate.players_for_type(self.gamestate.model.player_types[0])
+        for player in players:
+            player.isHuman = False
+        #players[0].isHuman = True
+
     def run(self):
         self.print_places(self.get_places())
         self.log.debug("Uruchamiam symulacje gry: " + self.gamestate.model.name)
@@ -48,7 +55,10 @@ class SimulatorEngine():
                         if self.gamestate.is_current_player_table_player():
                             self.log.error('table-player cannot provide input')
                             raise Exception()
-                        self.ask_player_for_choice(self.gamestate.current_player(), player_input)
+                        if self.gamestate.current_player().isHuman:
+                            self.ask_human_for_choice(self.gamestate.current_player(), player_input)
+                        else:
+                            self.ask_bot_for_choice(self.gamestate.current_player(), player_input)
 
                 current_rule.apply(self.gamestate)
                 current_rule = current_rule.next
@@ -64,8 +74,28 @@ class SimulatorEngine():
         test_player = self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0]
         self.print_places(self.get_places(test_player))
 
+    # TODO osobna klasa z botem
+    def ask_bot_for_choice(self, player: Player, player_input: PlayerInput):
+        choices = player_input.all_choices(self.gamestate)
+        from_place = player_input.source_place_picker.submitted()
+        to_place = player_input.target_place_picker.submitted()
+        all_cards_combinations = []
 
-    def ask_player_for_choice(self, player: Player, player_input: PlayerInput):
+        for length in range(len(choices)+1):
+            for subset in itertools.combinations(choices, length):
+                if player_input.condition.test(from_place, to_place, subset):
+                    all_cards_combinations.append(subset)
+
+        if len(all_cards_combinations) == 0:
+            self.log.error("No possible moves for player: " + player.name)
+            raise Exception()
+        
+        #TODO jak wybierać najlepsze rozwiąznie? Teraz wybieram to gdzie najwiecej kart
+        chosen = all_cards_combinations[-1]
+        player_input.submit_choices(chosen)
+        self.log.debug(player.name + " zagral karty: " + " ".join(map(str, chosen)))
+
+    def ask_human_for_choice(self, player: Player, player_input: PlayerInput):
         self.print_places_for_player(player)
         choices = player_input.all_choices(self.gamestate)
         print('{0} picks choice for: {1}'.format(player.name, player_input.name))
@@ -99,4 +129,5 @@ class SimulatorEngine():
 def run():
     game = simpleGameWithOnePlayerType(example_5_10_15(), 3)
     engine = SimulatorEngine(game)
+    engine.find_players()
     engine.run()
