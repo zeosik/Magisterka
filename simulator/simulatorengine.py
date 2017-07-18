@@ -91,13 +91,11 @@ class SimulatorEngine():
     # TODO osobna klasa z botem
     def ask_bot_for_choice(self, player: Player, player_input: PlayerInput):
         choices = player_input.all_choices(self.gamestate)
-        from_place = player_input.source_place_picker.submitted()
-        to_place = player_input.target_place_picker.submitted()
         all_cards_combinations = []
 
         for length in range(len(choices)+1):
             for subset in itertools.combinations(choices, length):
-                if player_input.condition.test(from_place, to_place, subset):
+                if player_input.submit_choices(subset):
                     all_cards_combinations.append(subset)
 
         if len(all_cards_combinations) == 0:
