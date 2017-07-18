@@ -14,6 +14,7 @@ from common.model.placepicker.placepicker import PlacePicker
 from common.model.places.cardline import PlayerCardLine
 from common.model.places.cardpile import FaceDownCardPile, FaceUpCardPile
 from common.model.playertype import PlayerType
+from common.model.rules.Pass import Pass
 from common.model.rules.changephase import ChangePhase
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.ifrule import If
@@ -50,18 +51,18 @@ def example_5_10_15():
 
     #faza - rozdanie poczatkowe
 
-    phase_start.rule = Shuffle(TablePlayerChooser(), deck)
+    phase_start.append_rule(Shuffle(TablePlayerChooser(), deck))
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
     #give_5_cards = lambda playerChooser: OldMove(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPickerOld(5))
     give_5_cards = lambda playerChooser: Move(TopCardPicker(5, PlacePicker(TablePlayerChooser(), deck), PlacePicker(playerChooser, player_hand)))
-    phase_start.rule.next = ForEachPlayer(player_type, give_5_cards)
-    phase_start.rule.next.next = ChangePhase(phase1, FirstPlayerChooser(player_type))
+    phase_start.rules[0].append_next(ForEachPlayer(player_type, give_5_cards))
+    phase_start.rules[0].next[0].append_next(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
     #faza - wybor gracza
     to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-    phase_choose_player.rule = to_player_turn
-    phase_win_check.rule = If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser()))
+    phase_choose_player.append_rule(to_player_turn)
+    phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool
@@ -73,8 +74,11 @@ def example_5_10_15():
     target_place_picker = PlacePicker(TablePlayerChooser(), discard_pile)
     picp = CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))
     #phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputCardPicker("any"), condition=sums_to_5_10_15)
-    phase1.rule = Move(picp)
-    phase1.rule.next = ChangePhase(phase_win_check, TablePlayerChooser())
+    phase1.append_rule(Move(picp))
+    phase1.append_rule(Pass())
+    phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
+    phase1.rules[0].append_next(phase1_endturn)
+    phase1.rules[1].append_next(phase1_endturn)
 
     return game
 

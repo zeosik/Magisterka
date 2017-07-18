@@ -42,37 +42,51 @@ class SimulatorEngine():
         self.log.debug("Tura gracza: " + self.gamestate.current_player().name)
         self.log.debug("-Przechodze do fazy: " + self.gamestate.current_phase().name)
 
+        last_phase = None
         while not self.gamestate.is_current_phase_end_game_phase():
 
+            if last_phase is not self.gamestate.current_phase():
+                all_rules = self.gamestate.current_phase().rules
+            else:
+                all_rules = current_rule.next
+
+            current_rule = self.choose_rule(all_rules)
             last_phase = self.gamestate.current_phase()
-            current_rule = last_phase.rule
-            while (current_rule):
-                self.log.debug("--Przetwarzam regule: " + current_rule.name)
 
-                inputs = current_rule.player_inputs()
-                for player_input in inputs:
-                    if player_input.requires_player_input(self.gamestate):
-                        if self.gamestate.is_current_player_table_player():
-                            self.log.error('table-player cannot provide input')
-                            raise Exception()
-                        if self.gamestate.current_player().isHuman:
-                            self.ask_human_for_choice(self.gamestate.current_player(), player_input)
-                        else:
-                            self.ask_bot_for_choice(self.gamestate.current_player(), player_input)
+            self.log.debug("--Przetwarzam regule: " + current_rule.name)
 
-                current_rule.apply(self.gamestate)
-                current_rule = current_rule.next
+            inputs = current_rule.player_inputs()
+            for player_input in inputs:
+                if player_input.requires_player_input(self.gamestate):
+                    if self.gamestate.is_current_player_table_player():
+                        self.log.error('table-player cannot provide input')
+                        raise Exception()
+                    if self.gamestate.current_player().isHuman:
+                        self.ask_human_for_choice(self.gamestate.current_player(), player_input)
+                    else:
+                        self.ask_bot_for_choice(self.gamestate.current_player(), player_input)
 
-            if current_rule is None and last_phase is self.gamestate.current_phase():
-                #TODO ChangePhase nie ma reguły next, a pytanie czy powinno to swoja drogą
-                #a tak to mozemy zobaczyc czy przypadkiem cos sie nie popsulo
-                self.log.error('No rules')
-                raise Exception()
+            current_rule.apply(self.gamestate)
+
 
         self.log.debug("Koncze symulacje")
         self.print_places(self.get_places())
         test_player = self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0]
         self.print_places(self.get_places(test_player))
+
+    def choose_rule(self, all_rules: list):
+        if len(all_rules) is 0:
+            self.log.error('no rules to choose')
+            raise Exception()
+        if self.gamestate.is_current_player_table_player():
+            if len(all_rules) is not 1:
+                self.log.error('table cannot make a choice, number of rules: {0}'.format(len(all_rules)))
+                raise Exception()
+            else:
+                return all_rules[0]
+        else:
+            #TODO wybor przez gracza
+            return all_rules[0]
 
     # TODO osobna klasa z botem
     def ask_bot_for_choice(self, player: Player, player_input: PlayerInput):

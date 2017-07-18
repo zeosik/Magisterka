@@ -33,5 +33,5 @@ class ForEachPlayer(Rule):
             self.orginal_next = None
         else:
             rule = self.create_action_func(ConstantPlayerChooser(self.current_player))
-            rule.next = self
-            self.next = rule
+            rule.append_next(self)
+            self.next = [rule]
