@@ -1,4 +1,5 @@
 from common.articaft_generators.cardgenerator import CardGenerator
+from common.model.conditions.emptyplace import EmptyPlace
 from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.playerchooser.firstplayerchooser import FirstPlayerChooser
 from common.model.playerchooser.nextplayerchooser import NextPlayerChooser
@@ -62,7 +63,8 @@ def example_5_10_15():
     #faza - wybor gracza
     to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
     phase_choose_player.append_rule(to_player_turn)
-    phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
+    phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , to_player_turn))
+    #phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza
     #Place, Place, Artifacts -> bool
@@ -75,7 +77,10 @@ def example_5_10_15():
     picp = CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))
     #phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputCardPicker("any"), condition=sums_to_5_10_15)
     phase1.append_rule(Move(picp))
-    phase1.append_rule(Pass())
+
+    take_card_from_deck = Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(CurrentPlayerChooser(player_type), player_hand)))
+    #phase1.append_rule(Pass())
+    phase1.append_rule(take_card_from_deck)
     phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
     phase1.rules[0].append_next(phase1_endturn)
     phase1.rules[1].append_next(phase1_endturn)
