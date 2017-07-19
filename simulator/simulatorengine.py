@@ -24,7 +24,7 @@ class SimulatorEngine():
 
     def print_places(self, places):
         for place in sorted(places):
-            print (place + ": " + " ".join(map(str, places[place])))
+            print (place + ": " + " ".join([artifact.name for artifact in places[place]]))
 
     def print_places_for_player(self, player: Player):
         self.print_places(self.get_places(player))
@@ -95,7 +95,7 @@ class SimulatorEngine():
 
         for length in range(len(choices)+1):
             for subset in itertools.combinations(choices, length):
-                if player_input.submit_choices(subset):
+                if player_input.submit_choices(subset)[0]:
                     all_cards_combinations.append(subset)
 
         if len(all_cards_combinations) == 0:
@@ -105,14 +105,14 @@ class SimulatorEngine():
         #TODO jak wybierać najlepsze rozwiąznie? Teraz wybieram to gdzie najwiecej kart
         chosen = all_cards_combinations[-1]
         player_input.submit_choices(chosen)
-        self.log.debug(player.name + " zagral karty: " + " ".join(map(str, chosen)))
+        self.log.debug(player.name + " zagral karty: " + " ".join([c.name for c in chosen]))
 
     def ask_human_for_choice(self, player: Player, player_input: PlayerInput):
         self.print_places_for_player(player)
         choices = player_input.all_choices(self.gamestate)
         print('{0} picks choice for: {1}'.format(player.name, player_input.name))
         for i, c in enumerate(choices):
-            print('{0} - {1}'.format(i, c))
+            print('{0} - {1}'.format(i, c.name))
         while True:
             str = input('pick indexes: ')
             indexes = [int(s) for s_comma in str.split(',') for s in s_comma.split(' ') if len(s) > 0]
