@@ -1,3 +1,5 @@
+from typing import List
+
 from common.model.playerinput import PlayerInput
 from simulator.gamestate import GameState
 
@@ -15,7 +17,7 @@ class Rule:
         self.inputs += (player_input.required_inputs())
         self.inputs.append(player_input)
 
-    def player_inputs(self) -> list: #List[PlayerInput]
+    def player_inputs(self) -> List[PlayerInput]:
         return self.inputs
 
     def append_next(self, rule): #Rule

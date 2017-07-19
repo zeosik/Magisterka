@@ -2,8 +2,11 @@ import logging, itertools
 
 from common.model.player import Player
 from common.model.playerinput import PlayerInput
+from common.model.rules.rule import Rule
+from common.model.rules.rulepicker import RulePicker
 from example import example_5_10_15
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
+
 
 class SimulatorEngine():
     def __init__(self, gamestate: GameState):
@@ -49,44 +52,81 @@ class SimulatorEngine():
                 all_rules = self.gamestate.current_phase().rules
             else:
                 all_rules = current_rule.next
-
-            current_rule = self.choose_rule(all_rules)
             last_phase = self.gamestate.current_phase()
 
+            rule_picker = RulePicker(all_rules)
+
+            if self.gamestate.is_current_player_table_player():
+                current_rule = self.table_turn(rule_picker)
+            else:
+                if self.gamestate.current_player().isHuman:
+                    current_rule = self.player_turn(self.gamestate.current_player(), rule_picker)
+                else:
+                    current_rule = self.bot_turn(self.gamestate.current_player(), rule_picker)
+
             self.log.debug("--Przetwarzam regule: " + current_rule.name)
-
-            inputs = current_rule.player_inputs()
-            for player_input in inputs:
-                if player_input.requires_player_input(self.gamestate):
-                    if self.gamestate.is_current_player_table_player():
-                        self.log.error('table-player cannot provide input')
-                        raise Exception()
-                    if self.gamestate.current_player().isHuman:
-                        self.ask_human_for_choice(self.gamestate.current_player(), player_input)
-                    else:
-                        self.ask_bot_for_choice(self.gamestate.current_player(), player_input)
-
             current_rule.apply(self.gamestate)
-
 
         self.log.debug("Koncze symulacje")
         self.print_places(self.get_places())
         test_player = self.gamestate.type_players_dict[self.gamestate.model.player_types[0]][0]
         self.print_places(self.get_places(test_player))
 
-    def choose_rule(self, all_rules: list):
-        if len(all_rules) is 0:
-            self.log.error('no rules to choose')
+    def table_turn(self, rule_picker: RulePicker) -> Rule:
+        if rule_picker.requires_player_input(self.gamestate):
+            self.log.error('table cannot pick a rule')
             raise Exception()
-        if self.gamestate.is_current_player_table_player():
-            if len(all_rules) is not 1:
-                self.log.error('table cannot make a choice, number of rules: {0}'.format(len(all_rules)))
+
+        rule = rule_picker.submitted()
+
+        for player_input in rule.player_inputs():
+            if player_input.requires_player_input(self.gamestate):
+                self.log.error('table cannot make a choice')
                 raise Exception()
-            else:
-                return all_rules[0]
-        else:
-            #TODO wybor przez gracza
-            return all_rules[0]
+        return rule
+
+    def player_turn(self, player: Player, rule_picker: RulePicker) -> Rule:
+        self.ask_human_for_choice(player, rule_picker)
+        rule = rule_picker.submitted()
+        for player_input in rule.player_inputs():
+            if player_input.requires_player_input(self.gamestate):
+                self.ask_human_for_choice(self.gamestate.current_player(), player_input)
+        return rule
+
+    def bot_turn(self, player: Player, rule_picker: RulePicker) -> Rule:
+        for rule in self.bot_valid_combinations(rule_picker, self.gamestate):
+            #TODO to i tak trzeba troche przemyslec ale jako tako dziala
+            rule = rule[0]
+            success = True
+            made_choices = []
+            for player_input in rule.player_inputs():
+                if player_input.requires_player_input(self.gamestate):
+                    all = self.bot_valid_combinations(player_input, self.gamestate)
+                    if len(all) > 0:
+                        bot_choice = all[-1]
+                        player_input.submit_choices(bot_choice)
+                        made_choices.append(bot_choice)
+                    else:
+                        success = False
+            if success:
+                self.log.debug('{0} choose rule: {1}'.format(player.name, rule.name))
+                for choice in made_choices:
+                    self.log.debug('made choice: {0}'.format([c.name for c in choice]))
+                return rule
+
+        self.log.error("No possible moves for player: " + player.name)
+        raise Exception()
+
+    def bot_valid_combinations(self, player_input: PlayerInput, gamestate: GameState) -> list:
+        choices = player_input.all_choices(gamestate)
+        all = []
+        for length in range(len(choices) + 1):
+            for subset in itertools.combinations(choices, length):
+                if player_input.submit_choices(subset)[0]:
+                    all.append(subset)
+        return all
+
+
 
     # TODO osobna klasa z botem
     def ask_bot_for_choice(self, player: Player, player_input: PlayerInput):
