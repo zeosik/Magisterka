@@ -1,8 +1,8 @@
 from common.articaft_generators.cardgenerator import CardGenerator
-from common.model.PlayerChooser.currentplayerchooser import CurrentPlayerChooser
-from common.model.PlayerChooser.firstplayerchooser import FirstPlayerChooser
-from common.model.PlayerChooser.nextplayerchooser import NextPlayerChooser
-from common.model.PlayerChooser.tableplayerchooser import TablePlayerChooser
+from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
+from common.model.playerchooser.firstplayerchooser import FirstPlayerChooser
+from common.model.playerchooser.nextplayerchooser import NextPlayerChooser
+from common.model.playerchooser.tableplayerchooser import TablePlayerChooser
 from common.model.artifacts.card import CardColor
 from common.model.cardpicker.cardpicker import CardPicker
 from common.model.cardpicker.topcardpicker import TopCardPicker
@@ -14,7 +14,7 @@ from common.model.placepicker.placepicker import PlacePicker
 from common.model.places.cardline import PlayerCardLine
 from common.model.places.cardpile import FaceDownCardPile, FaceUpCardPile
 from common.model.playertype import PlayerType
-from common.model.rules.Pass import Pass
+from common.model.rules.passrule import Pass
 from common.model.rules.changephase import ChangePhase
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.ifrule import If
@@ -51,7 +51,7 @@ def example_5_10_15():
 
     #faza - rozdanie poczatkowe
 
-    phase_start.append_rule(Shuffle(TablePlayerChooser(), deck))
+    phase_start.append_rule(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
     #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
     #give_5_cards = lambda playerChooser: OldMove(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPickerOld(5))

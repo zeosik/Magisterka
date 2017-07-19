@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from common.model.PlayerInput import PlayerInput
+from common.model.playerinput import PlayerInput
 from common.model.conditions.moveconditions.movecondition import MoveCondition
 from common.model.placepicker.placepicker import PlacePicker
 from common.model.places.place import Place
@@ -10,7 +10,7 @@ from simulator.gamestate import GameState
 class CardPicker(PlayerInput):
 
     def __init__(self, source_place_picker: PlacePicker, target_place_picker: PlacePicker, condition: MoveCondition, name = 'Card Picker'):
-        super().__init__(name)
+        super().__init__('{0} from_place: {1}, to_place: {2}, condition: {3}'.format(name, source_place_picker.name, target_place_picker.name, condition.name))
         self.source_place_picker = source_place_picker
         self.target_place_picker = target_place_picker
         self.condition = condition

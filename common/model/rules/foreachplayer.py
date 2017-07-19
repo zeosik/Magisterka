@@ -1,7 +1,7 @@
 from typing import Callable
 
-from common.model.PlayerChooser.constantplayerchooser import ConstantPlayerChooser
-from common.model.PlayerChooser.playerchooser import PlayerChooser
+from common.model.playerchooser.constantplayerchooser import ConstantPlayerChooser
+from common.model.playerchooser.playerchooser import PlayerChooser
 from common.model.playertype import PlayerType
 from common.model.rules.rule import Rule
 

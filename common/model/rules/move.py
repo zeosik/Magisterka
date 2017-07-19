@@ -7,13 +7,10 @@ from simulator.gamestate import GameState
 class Move(Rule):
 
     def __init__(self, card_picker: CardPicker):
-        #super().__init__("Move from {0}:{1} to {2}:{3}".format(from_player.name, from_place.name, to_player.name, to_place.name))
-        super().__init__('Move')
+        super().__init__('Move: {0}'.format(card_picker.name))
         self.log = logging.getLogger(self.__class__.__name__)
         self.card_picker = card_picker
-
-    def player_inputs(self):
-        return self.card_picker.required_inputs() + [self.card_picker]
+        self.register_input(self.card_picker)
 
     def apply(self, gamestate: GameState):
         cards = self.card_picker.submitted_choice()

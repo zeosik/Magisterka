@@ -1,7 +1,7 @@
 import logging, itertools
 
-from common.model import PlayerInput
 from common.model.player import Player
+from common.model.playerinput import PlayerInput
 from example import example_5_10_15
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 
