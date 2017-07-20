@@ -9,7 +9,6 @@ from common.model.playerchooser.tableplayerchooser import TablePlayerChooser
 from common.model.artifacts.card import CardColor
 from common.model.cardpicker.cardpicker import CardPicker
 from common.model.cardpicker.topcardpicker import TopCardPicker
-from common.model.conditions.ifcounter import IfCounter
 from common.model.conditions.moveconditions.cardssumsto import CardsSumsTo
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
@@ -70,7 +69,7 @@ def example_5_10_15() -> GameModel:
     to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
     to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
     phase_choose_player.append_rule(to_player_turn)
-    phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , to_player_turn))
+    phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , ChangePhase(phase_choose_player, TablePlayerChooser())))
     #phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza

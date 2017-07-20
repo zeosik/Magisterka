@@ -12,7 +12,6 @@ from common.model.playertype import PlayerType
 from common.model.rules.changephase import ChangePhase
 from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
-from editor.widgets.itemspanel.itemspanel import ItemsPanel
 from example import example_5_10_15
 
 gi.require_version('Gtk', '3.0')
@@ -141,7 +140,7 @@ class ModelViewWindow(Gtk.ApplicationWindow):
 
         pos = sfdp_layout(graph)
 
-        graph_widget = GraphWidget(graph, pos, vertex_text = graph.vp.name, vertex_font_size=22, vertex_size=10)
+        graph_widget = GraphWidget(graph, pos, vertex_text = graph.vp.name, vertex_font_size=12, vertex_size=10)
         self.phase_panel.pack_start(graph_widget, True, True, 0)
 
         self.phase_panel.show_all()
@@ -169,7 +168,7 @@ class ModelViewWindow(Gtk.ApplicationWindow):
 
         pos = sfdp_layout(graph)
 
-        graph_widget = GraphWidget(graph, pos, vertex_text=graph.vp.name, vertex_font_size=22, vertex_size=10)
+        graph_widget = GraphWidget(graph, pos, vertex_text=graph.vp.name, vertex_font_size=12, vertex_size=10)
         self.phase_panel.pack_start(Gtk.Label('gameflow'), False, False, 0)
         self.phase_panel.pack_start(graph_widget, True, True, 0)
         self.phase_panel.show_all()
