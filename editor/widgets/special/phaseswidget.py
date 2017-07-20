@@ -20,6 +20,7 @@ class PhasesWidget(ItemsPanel):
         self.mediator.player_types.add.register(self.clear_selection)
         self.mediator.player_types.select.register(self.clear_selection)
         self.mediator.phases.add.register(self.on_phase_add)
+        self.mediator.clear_state.register(lambda s, v: self.list_box.clear_items())
 
         add_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_ADD))
         add_button.connect('clicked', self.add_phase)

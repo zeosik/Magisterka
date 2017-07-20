@@ -1,9 +1,9 @@
 import logging
 
+from common.initlogger import initloggerconfiguration
 from simulator import simulatorengine
 
 if __name__ == "__main__":
-    FORMAT = '%(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+    initloggerconfiguration()
 
     simulatorengine.run()

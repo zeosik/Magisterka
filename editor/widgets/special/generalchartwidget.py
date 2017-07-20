@@ -2,6 +2,7 @@ import gi
 from graph_tool import Graph
 from graph_tool.draw import GraphWidget
 
+from editor.mediator import Mediator
 from editor.widgets.itemspanel.panelheader import PanelHeader
 
 gi.require_version('Gtk', '3.0')
@@ -10,7 +11,7 @@ from gi.repository import Gtk
 
 class GeneralChartWidget(Gtk.VBox):
 
-    def __init__(self, mediator):
+    def __init__(self, mediator: Mediator):
         Gtk.VBox.__init__(self)
 
         self.players = []
@@ -24,6 +25,7 @@ class GeneralChartWidget(Gtk.VBox):
         mediator.phases.add.register(self.on_phase_add)
         mediator.player_types.remove.register(self.on_player_remove)
         mediator.phases.remove.register(self.on_phase_remove)
+        mediator.clear_state.register(self.clear_state)
 
         self.draw_chart()
 
@@ -63,3 +65,8 @@ class GeneralChartWidget(Gtk.VBox):
         self.graph_widget = GraphWidget(self.graph, self.graph.vp.pos, vprops = self.vprops)
         self.pack_start(self.graph_widget, True, True, 0)
         self.graph_widget.show()
+
+    def clear_state(self, sender, value):
+        self.players.clear()
+        self.phases.clear()
+        self.draw_chart()

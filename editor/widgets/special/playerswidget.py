@@ -1,5 +1,6 @@
 import gi
 
+from editor.mediator import Mediator
 from editor.namegenerator.name_generator import NameGenerator
 
 gi.require_version('Gtk', '3.0')
@@ -10,7 +11,7 @@ from editor.widgets.itemspanel.itemspanel import ItemsPanel
 
 
 class PlayersWidget(ItemsPanel):
-    def __init__(self, mediator):
+    def __init__(self, mediator: Mediator):
         ItemsPanel.__init__(self, 'List of Players', mediator.player_types.remove.fire, mediator.player_types.select.fire)
 
         self.name_generator = NameGenerator('Team')
@@ -19,6 +20,7 @@ class PlayersWidget(ItemsPanel):
         self.mediator.player_types.add.register(self.on_player_add)
         self.mediator.phases.add.register(self.clear_selection)
         self.mediator.phases.select.register(self.clear_selection)
+        self.mediator.clear_state.register(lambda s, v: self.list_box.clear_items())
 
         add_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_ADD))
         add_button.connect('clicked', self.add_player_button_click)
@@ -34,3 +36,4 @@ class PlayersWidget(ItemsPanel):
 
     def clear_selection(self, sender, value):
         self.list_box.clear_selection()
+

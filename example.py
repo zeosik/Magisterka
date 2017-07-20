@@ -25,7 +25,7 @@ from common.model.rules.move import Move
 from common.model.rules.shuffle import Shuffle
 
 
-def example_5_10_15():
+def example_5_10_15() -> GameModel:
 
     game = GameModel('5-10-15')
 
