@@ -1,5 +1,7 @@
 from common.articaft_generators.cardgenerator import CardGenerator
 from common.model.conditions.emptyplace import EmptyPlace
+from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
+from common.model.conditions.newround import NewRound
 from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.playerchooser.firstplayerchooser import FirstPlayerChooser
 from common.model.playerchooser.nextplayerchooser import NextPlayerChooser
@@ -49,6 +51,7 @@ def example_5_10_15():
     phase_choose_player = table_type.add_phase(Phase('choose-player'))
     phase_win_check = table_type.add_phase(Phase('win-check'))
     phase1 = player_type.add_phase(Phase('phase1'))
+    phase2_draw = player_type.add_phase(Phase('phase2-draw'))
 
     #faza - rozdanie poczatkowe
 
@@ -61,7 +64,11 @@ def example_5_10_15():
     phase_start.rules[0].next[0].append_next(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
     #faza - wybor gracza
-    to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+    to_player_turn_phase1 = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+    to_player_turn_phase2 = ChangePhase(phase2_draw, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+    to_player_turn_when_phase1 = If(NewRound(player_type), to_player_turn_phase2, to_player_turn_phase1)
+    to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
+    to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
     phase_choose_player.append_rule(to_player_turn)
     phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , to_player_turn))
     #phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
@@ -79,11 +86,16 @@ def example_5_10_15():
     phase1.append_rule(Move(picp))
 
     take_card_from_deck = Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(CurrentPlayerChooser(player_type), player_hand)))
-    #phase1.append_rule(Pass())
-    phase1.append_rule(take_card_from_deck)
+    phase1.append_rule(Pass())
+    #phase1.append_rule(take_card_from_deck)
     phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
     phase1.rules[0].append_next(phase1_endturn)
     phase1.rules[1].append_next(phase1_endturn)
+
+    #phase2-draw
+    phase2_draw.append_rule(take_card_from_deck)
+    phase2_end_turn = ChangePhase(phase_choose_player, TablePlayerChooser())
+    phase2_draw.rules[0].append_next(phase2_end_turn)
 
     return game
 
