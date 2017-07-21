@@ -3,6 +3,7 @@ import sys
 import gi
 import logging
 
+from gi.overrides import Gdk
 from graph_tool import Graph
 from graph_tool.draw import GraphWidget, sfdp_layout
 
@@ -65,6 +66,8 @@ class EditorWindow(Gtk.ApplicationWindow):
 
         self.add(self.main_HBox)
 
+        self.connect('delete_event', app.on_quit)
+
     def load_model(self, model : GameModel):
         self.mediator.clear_state.fire(self, None)
 
@@ -84,15 +87,34 @@ class ModelViewWindow(Gtk.ApplicationWindow):
         button = Gtk.Button('game Flow')
         self.model = example_5_10_15()
         button.connect('clicked', lambda w: self.show_game_flow(self.model))
-        self.main_panel.pack_start(button, False, False, 0)
-        self.main_panel.pack_start(self.player_types_panel, False, False, 0)
+
+        self.buttons_panel = Gtk.VBox()
+        self.buttons_panel.pack_start(button, False, False, 0)
+
+        box = self.box_with_label('start color', self.start_rule_color())
+        self.buttons_panel.pack_start(box, False, False, 0)
+
+        box = self.box_with_label('rule color', self.rule_color())
+        self.buttons_panel.pack_start(box, False, False, 0)
+
+        self.buttons_panel.pack_start(self.player_types_panel, False, False, 15)
+        self.main_panel.pack_start(self.buttons_panel, False, False, 0)
         self.main_panel.pack_start(self.phase_panel, True, True, 0)
         self.add(self.main_panel)
 
-    def create_player_type_panel(self, player_type: PlayerType):
+        self.connect('delete_event', app.on_quit)
+
+    def box_with_label(self, text, color):
+        eb = Gtk.EventBox()
+        label = Gtk.Label(text)
+        eb.add(label)
+        eb.modify_bg(Gtk.StateFlags.NORMAL, Gdk.color_parse(color))
+        return eb
+
+    def create_player_type_panel(self, player_type: PlayerType, color):
         container = Gtk.VBox()
-        name = Gtk.Label(player_type.name)
-        container.pack_start(name, True, True, 0)
+        box = self.box_with_label(player_type.name, color)
+        container.pack_start(box, True, True, 0)
         phases = Gtk.ListBox()
         phases.connect('row-activated', lambda lb, row: self.show_phase(row.object))
         for phase in player_type.phases:
@@ -126,13 +148,28 @@ class ModelViewWindow(Gtk.ApplicationWindow):
         graph = Graph()
         #graph.vp.pos = graph.new_vertex_property('vector<double>')
         graph.vp.name = graph.new_vertex_property('string')
+        graph.vp.color = graph.new_vertex_property('string')
+        graph.vp.shape = graph.new_vertex_property('string')
 
         rule_vertex = {}
+        self.vertex_full_name = {}
+        self.phase_name_label = Gtk.Label('selected phase name')
+        self.phase_name_label.set_line_wrap(True)
+        self.phase_panel.pack_start(self.phase_name_label, False, False, 0)
 
         for rule in rules:
             vertex = graph.add_vertex()
             rule_vertex[rule] = vertex
-            graph.vp.name[vertex] = rule.name[:15]
+            self.vertex_full_name[vertex] = rule.name
+            graph.vp.name[vertex] = rule.__class__.__name__
+            if rule is start:
+                color = self.start_rule_color()
+            elif issubclass(rule.__class__, ChangePhase):
+                color = self.end_rule_color(rule)
+            else:
+                color = self.rule_color()
+            graph.vp.color[vertex] = color
+            graph.vp.shape[vertex] = 'triangle' if issubclass(rule.__class__, If) else 'circle'
 
         for rule in rules:
             for next_rule in self.next_rules(rule):
@@ -140,10 +177,22 @@ class ModelViewWindow(Gtk.ApplicationWindow):
 
         pos = sfdp_layout(graph)
 
-        graph_widget = GraphWidget(graph, pos, vertex_text = graph.vp.name, vertex_font_size=12, vertex_size=10)
+        vprops = {
+            'text': graph.vp.name,
+            'fill_color': graph.vp.color,
+            'shape': graph.vp.shape
+        }
+        graph_widget = GraphWidget(graph, pos, vprops=vprops, vertex_size=50)
+        graph_widget.connect('button-release-event', self.on_vertex_clicked)
         self.phase_panel.pack_start(graph_widget, True, True, 0)
 
         self.phase_panel.show_all()
+
+    def on_vertex_clicked(self, widget, event):
+        if widget.picked is not None:
+            name = self.vertex_full_name[widget.picked]
+            self.phase_name_label.set_text(name)
+        return False
 
     def show_game_flow(self, model: GameModel):
 
@@ -156,11 +205,19 @@ class ModelViewWindow(Gtk.ApplicationWindow):
 
         graph = Graph()
         graph.vp.name = graph.new_vertex_property('string')
+        graph.vp.color = graph.new_vertex_property('string')
         phase_vertex = {}
         for phase in all_phases:
             vertex = graph.add_vertex()
             phase_vertex[phase] = vertex
             graph.vp.name[vertex] = phase.name
+            if phase is model.start_phase:
+                color = self.start_rule_color()
+            elif phase in model.table_type.phases:
+                color = self.table_color()
+            else:
+                color = self.player_color()
+            graph.vp.color[vertex] = color
 
         for phase in all_phases:
             for other in phase_phase[phase]:
@@ -168,10 +225,30 @@ class ModelViewWindow(Gtk.ApplicationWindow):
 
         pos = sfdp_layout(graph)
 
-        graph_widget = GraphWidget(graph, pos, vertex_text=graph.vp.name, vertex_font_size=12, vertex_size=10)
+        vprops = {
+            'text': graph.vp.name,
+            'fill_color': graph.vp.color
+        }
+
+        graph_widget = GraphWidget(graph, pos, vprops=vprops, vertex_size=50)
         self.phase_panel.pack_start(Gtk.Label('gameflow'), False, False, 0)
         self.phase_panel.pack_start(graph_widget, True, True, 0)
         self.phase_panel.show_all()
+
+    def player_color(self):
+        return 'yellow'
+
+    def table_color(self):
+        return '#66CD00' #light green
+
+    def start_rule_color(self):
+        return 'cyan'
+
+    def rule_color(self):
+        return 'orange'
+
+    def end_rule_color(self, rule):
+        return self.table_color() if rule.phase in self.model.table_type.phases else self.player_color()
 
     def end_phases(self, phase: Phase):
         all_rules = set()
@@ -183,7 +260,8 @@ class ModelViewWindow(Gtk.ApplicationWindow):
     def show_model(self, model: GameModel):
         self.clear_container(self.player_types_panel)
         for player_type in [model.table_type] + model.player_types:
-            panel = self.create_player_type_panel(player_type)
+            color = self.table_color() if model.table_type is player_type else self.player_color()
+            panel = self.create_player_type_panel(player_type, color)
             self.player_types_panel.pack_start(panel, True, True, 0)
         self.model = model
         self.show_game_flow(model)
@@ -215,7 +293,8 @@ class EditorApplication(Gtk.Application):
     def do_activate(self):
         self.editor_window = EditorWindow(self)
         self.view_model_window = ModelViewWindow(self)
-        self.editor_window.show_all()
+        #self.view_model_window.show_all()
+        self.load_example_5_10_15(None, None)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
