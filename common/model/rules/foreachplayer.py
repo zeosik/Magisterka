@@ -32,6 +32,10 @@ class ForEachPlayer(Rule):
             self.current_player = None
             self.orginal_next = None
         else:
-            rule = self.create_action_func(ConstantPlayerChooser(self.current_player))
-            rule.append_next(self)
-            self.next = [rule]
+            self.next = self.create_actions(ConstantPlayerChooser(self.current_player))
+
+    def create_actions(self, player_chooser: PlayerChooser):
+        rule = self.create_action_func(player_chooser)
+        # TODO a co jak jest więcej niż 1?
+        rule.append_next(self)
+        return [rule]

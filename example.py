@@ -24,7 +24,7 @@ from common.model.rules.move import Move
 from common.model.rules.shuffle import Shuffle
 
 
-def example_5_10_15() -> GameModel:
+def example_5_10_15(two_phase: bool = True) -> GameModel:
 
     game = GameModel('5-10-15')
 
@@ -49,8 +49,11 @@ def example_5_10_15() -> GameModel:
     game.end_phase = phase_end
     phase_choose_player = table_type.add_phase(Phase('choose-player'))
     phase_win_check = table_type.add_phase(Phase('win-check'))
-    phase1 = player_type.add_phase(Phase('phase1'))
-    phase2_draw = player_type.add_phase(Phase('phase2-draw'))
+    if two_phase:
+        phase1 = player_type.add_phase(Phase('phase1'))
+        phase2_draw = player_type.add_phase(Phase('phase2-draw'))
+    else:
+        phase1 = player_type.add_phase(Phase('phase1'))
 
     #faza - rozdanie poczatkowe
 
@@ -63,38 +66,40 @@ def example_5_10_15() -> GameModel:
     phase_start.rules[0].next[0].append_next(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
     #faza - wybor gracza
-    to_player_turn_phase1 = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-    to_player_turn_phase2 = ChangePhase(phase2_draw, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-    to_player_turn_when_phase1 = If(NewRound(player_type), to_player_turn_phase2, to_player_turn_phase1)
-    to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
-    to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
+    if two_phase:
+        to_player_turn_phase1 = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_phase2 = ChangePhase(phase2_draw, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_when_phase1 = If(NewRound(player_type), to_player_turn_phase2, to_player_turn_phase1)
+        to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
+        to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
+    else:
+        to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
     phase_choose_player.append_rule(to_player_turn)
+
+    #faza - sprawdzenie wygranej
     phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , ChangePhase(phase_choose_player, TablePlayerChooser())))
     #phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
 
     #faza - tura gracza
-    #Place, Place, Artifacts -> bool
-    sums_to_5_10_15 = lambda from_place, to_place, moved_cards: moved_cards.ranks_sum() in [5,10,15]
-    #w makao bedzie coś w stylu moved_cards[0].color == to_place.top_card.color
-
-
     source_place_picker = PlacePicker(CurrentPlayerChooser(player_type), player_hand)
     target_place_picker = PlacePicker(TablePlayerChooser(), discard_pile)
-    picp = CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))
-    #phase1.rule = Move(CurrentPlayerChooser(player_type), player_hand, TablePlayerChooser(), discard_pile, PlayerInputCardPicker("any"), condition=sums_to_5_10_15)
-    phase1.append_rule(Move(picp))
+    phase1.append_rule(Move(CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))))
 
     take_card_from_deck = Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(CurrentPlayerChooser(player_type), player_hand)))
-    phase1.append_rule(Pass())
+    if two_phase:
+        phase1.append_rule(Pass())
+    else:
+        phase1.append_rule(take_card_from_deck)
     #phase1.append_rule(take_card_from_deck)
     phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
     phase1.rules[0].append_next(phase1_endturn)
     phase1.rules[1].append_next(phase1_endturn)
 
     #phase2-draw
-    phase2_draw.append_rule(take_card_from_deck)
-    phase2_end_turn = ChangePhase(phase_choose_player, TablePlayerChooser())
-    phase2_draw.rules[0].append_next(phase2_end_turn)
+    if two_phase:
+        phase2_draw.append_rule(take_card_from_deck)
+        phase2_end_turn = ChangePhase(phase_choose_player, TablePlayerChooser())
+        phase2_draw.rules[0].append_next(phase2_end_turn)
 
     return game
 

@@ -23,10 +23,11 @@ class ListBox(Gtk.ScrolledWindow):
         label.set_alignment(0, 0.5)
         row_hbox.pack_start(label, True, True, 5)
 
-        remove_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_DELETE))
-        remove_button.row = row
-        remove_button.connect('clicked', self.remove_item)
-        row_hbox.pack_start(remove_button, True, True, 0)
+        if self.on_row_remove is not None:
+            remove_button = Gtk.Button(None, image=Gtk.Image(stock=Gtk.STOCK_DELETE))
+            remove_button.row = row
+            remove_button.connect('clicked', self.remove_item)
+            row_hbox.pack_start(remove_button, True, True, 0)
 
         row.add(row_hbox)
         row.object = object
