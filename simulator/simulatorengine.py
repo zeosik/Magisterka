@@ -7,7 +7,7 @@ from common.model.rules.rulepicker import RulePicker
 from simulator.network.server import Server
 from simulator.network.botclient import BotClient
 from simulator.network.humanclient import HumanClient
-from example import example_5_10_15
+from example import example_5_10_15, example_card_sequence
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 
 
@@ -98,12 +98,13 @@ class SimulatorEngine():
 
         for player_input in rule.player_inputs():
             if player_input.requires_player_input(self.gamestate):
-                self.log.error('table cannot make a choice')
+                self.log.error('table cannot make a choice for rule: {0}'.format(rule.name))
                 raise Exception()
         return rule
 
 def run():
-    game = simpleGameWithOnePlayerType(example_5_10_15(), 3)
+    #game = simpleGameWithOnePlayerType(example_5_10_15(), 3)
+    game = simpleGameWithOnePlayerType(example_card_sequence(), 3)
     engine = SimulatorEngine(game)
     engine.prepare_server_and_clients()
     engine.run()

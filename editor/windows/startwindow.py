@@ -3,7 +3,7 @@ from gi.overrides.Gtk import Gtk
 
 from common.model.gamemodel import GameModel
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
-from example import example_5_10_15
+from example import example_5_10_15, example_card_sequence
 
 
 class StartWindow(Gtk.ApplicationWindow):
@@ -31,8 +31,12 @@ class StartWindow(Gtk.ApplicationWindow):
             '1 faza': example_5_10_15(True),
             '2 fazy': example_5_10_15(False)
         }
+        games_two_paies = {
+            'standard': example_card_sequence()
+        }
         return {
-            '5-10-15': games_5_10_15
+            '5-10-15': games_5_10_15,
+            'komplet kart': games_two_paies
         }
 
     def on_example_select(self, sender, game_model: GameModel):

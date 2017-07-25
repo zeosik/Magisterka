@@ -9,14 +9,16 @@ from simulator.gamestate import GameState
 
 class CardPicker(PlayerInput):
 
-    def __init__(self, source_place_picker: PlacePicker, target_place_picker: PlacePicker, condition: MoveCondition, name = 'Card Picker'):
-        super().__init__('{0} from_place: {1}, to_place: {2}, condition: {3}'.format(name, source_place_picker.name, target_place_picker.name, condition.name))
+    def __init__(self, source_place_picker: PlacePicker, target_place_picker: PlacePicker, name: str = 'Card Picker'):
+        super().__init__('{0} from_place: {1}, to_place: {2}'.format(name, source_place_picker.name, target_place_picker.name))
         self.source_place_picker = source_place_picker
         self.target_place_picker = target_place_picker
-        self.condition = condition
-
+        self.conditions = []
         self.append_required_inputs(self.source_place_picker)
         self.append_required_inputs(self.target_place_picker)
+
+    def add_condition(self, condition: MoveCondition):
+        self.conditions.append(condition)
 
     def all_choices(self, gamestate: GameState):
         place = self.source_place_picker.submitted()
@@ -25,7 +27,8 @@ class CardPicker(PlayerInput):
     def submit_choices(self, choices: list) -> Tuple[bool, str]:
         from_place = self.source_place_picker.submitted()
         to_place = self.target_place_picker.submitted()
-        if not self.condition.test(from_place, to_place, choices):
-            return False, 'did not match condition: {0}'.format(self.condition.name)
+        for condition in self.conditions:
+            if not condition.test(from_place, to_place, choices):
+                return False, 'did not match condition: {0}'.format(condition.name)
         return super().submit_choices(choices)
 

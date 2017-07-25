@@ -5,8 +5,8 @@ from simulator.gamestate import GameState
 
 class TopCardPicker(CardPicker):
 
-    def __init__(self, card_count, source_place_picker: PlacePicker, target_place_picker: PlacePicker, condition: MoveCondition = MoveCondition()):
-        super().__init__(source_place_picker, target_place_picker, condition, 'Top card picker')
+    def __init__(self, card_count, source_place_picker: PlacePicker, target_place_picker: PlacePicker, name = 'Top card picker'):
+        super().__init__(source_place_picker, target_place_picker, name)
         self.card_count = card_count
 
     def auto_submitted_values(self, gamestate: GameState) -> list:

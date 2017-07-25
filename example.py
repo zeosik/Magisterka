@@ -1,6 +1,11 @@
 from common.articaft_generators.cardgenerator import CardGenerator
+from common.model.cardpicker.duplicaterankcardpicker import DuplicateRankCardPicker
+from common.model.cardpicker.topcardfillpicker import TopCardFillPicker
+from common.model.conditions.artifactsinplaceequal import ArtifactsInPlaceEqual
+from common.model.conditions.artifactsinplacelessthen import ArtifactsInPlaceLessThen
 from common.model.conditions.emptyplace import EmptyPlace
 from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
+from common.model.conditions.moveconditions.numberofmovedartifacts import NumberOfMovedArtifacts
 from common.model.conditions.newround import NewRound
 from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.playerchooser.firstplayerchooser import FirstPlayerChooser
@@ -13,7 +18,7 @@ from common.model.conditions.moveconditions.cardssumsto import CardsSumsTo
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
 from common.model.placepicker.placepicker import PlacePicker
-from common.model.places.cardline import PlayerCardLine
+from common.model.places.cardline import PlayerCardLine, FaceUpCardLine
 from common.model.places.cardpile import FaceDownCardPile, FaceUpCardPile
 from common.model.playertype import PlayerType
 from common.model.rules.passrule import Pass
@@ -83,7 +88,9 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     #faza - tura gracza
     source_place_picker = PlacePicker(CurrentPlayerChooser(player_type), player_hand)
     target_place_picker = PlacePicker(TablePlayerChooser(), discard_pile)
-    phase1.append_rule(Move(CardPicker(source_place_picker, target_place_picker, CardsSumsTo([5, 10, 15]))))
+    card_picker = CardPicker(source_place_picker, target_place_picker)
+    card_picker.add_condition(CardsSumsTo([5, 10, 15]))
+    phase1.append_rule(Move(card_picker))
 
     take_card_from_deck = Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(CurrentPlayerChooser(player_type), player_hand)))
     if two_phase:
@@ -104,6 +111,84 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     return game
 
 
+def example_card_sequence():
+    game = GameModel('dwie pary')
 
+    table_type = game.add_table_type(PlayerType('table-type'))
+    player_type = game.add_player_type(PlayerType('player-type'))
 
+    # rekwizyty
+    cards = CardGenerator.cards(1, 10, list(CardColor))
+
+    #miejsca
+    middle = table_type.add_place(FaceUpCardLine('middle'))
+    deck = table_type.add_place(FaceDownCardPile('deck', cards))
+    discard = table_type.add_place(FaceDownCardPile('discard'))
+    points = player_type.add_place(FaceDownCardPile('points'))
+
+    #fazy stolu
+    start_phase = table_type.add_phase(Phase('start'))
+    refill_middle_phase = table_type.add_phase(Phase('refill-middle'))
+    move_duplicates_phase = table_type.add_phase(Phase('move duplicates'))
+    win_check_phase = table_type.add_phase(Phase('check victory'))
+    choose_player_phase = table_type.add_phase(Phase('choose-player'))
+    end_phase = table_type.add_phase(Phase('end'))
+
+    game.start_phase = start_phase
+    game.end_phase = end_phase
+
+    #table_place_pickers
+    middle_picker = PlacePicker(TablePlayerChooser(), middle)
+    deck_picker = PlacePicker(TablePlayerChooser(), deck)
+    discard_picker = PlacePicker(TablePlayerChooser(), discard)
+
+    #fazy graczy
+    player_phase = player_type.add_phase(Phase('player-phase'))
+
+    #start_phase
+    start_phase.append_rule(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
+    fill_middle_to_8_cards = Move(TopCardFillPicker(8, PlacePicker(TablePlayerChooser(), deck), PlacePicker(TablePlayerChooser(), middle)))
+    start_phase.rules[0].append_next(fill_middle_to_8_cards)
+    start_phase.rules[0].next[0].append_next(ChangePhase(player_phase, FirstPlayerChooser(player_type)))
+
+    #refill middle
+    full_middle = ArtifactsInPlaceEqual(8, PlacePicker(TablePlayerChooser(), middle))
+    move_middle_to_discard = Move(TopCardPicker(8, PlacePicker(TablePlayerChooser(), middle), PlacePicker(TablePlayerChooser(), discard)))
+    less_then_8_cards_in_deck = ArtifactsInPlaceLessThen(8, PlacePicker(TablePlayerChooser(), deck))
+    #TODO moze allcardspicker?
+    move_discard_to_deck = Move(TopCardFillPicker(40, discard_picker, deck_picker))
+    shuffle_deck = Shuffle(deck_picker)
+    move_discard_to_deck.append_next(shuffle_deck)
+    fill_middle_cards = Move(TopCardFillPicker(8, deck_picker, middle_picker))
+    shuffle_deck.append_next(fill_middle_cards)
+    check_if_shuffle_deck = If(less_then_8_cards_in_deck, move_discard_to_deck, fill_middle_cards)
+    move_middle_to_discard.append_next(check_if_shuffle_deck)
+    to_move_duplciates = ChangePhase(move_duplicates_phase, TablePlayerChooser())
+    fill_middle_cards.append_next(to_move_duplciates)
+    refill_middle_phase.append_rule(If(full_middle, move_middle_to_discard, check_if_shuffle_deck))
+
+    #move duplicates
+    move_duplicates_phase.append_rule(Move(DuplicateRankCardPicker(PlacePicker(CurrentPlayerChooser(player_type), points), PlacePicker(TablePlayerChooser(), discard))))
+    move_duplicates_phase.rules[0].append_next(ChangePhase(win_check_phase, TablePlayerChooser()))
+
+    #win check
+    to_choose_player = ChangePhase(choose_player_phase, TablePlayerChooser())
+    to_end_game = ChangePhase(end_phase, TablePlayerChooser())
+    has_10_cards = ArtifactsInPlaceEqual(10, PlacePicker(CurrentPlayerChooser(player_type), points))
+    win_check_phase.append_rule(If(has_10_cards, to_end_game, to_choose_player))
+
+    #choose player
+    choose_player_phase.append_rule(ChangePhase(player_phase, NextPlayerChooser(CurrentPlayerChooser(player_type))))
+
+    #player_phase
+    p_card_picker = CardPicker(PlacePicker(TablePlayerChooser(), middle), PlacePicker(CurrentPlayerChooser(player_type), points))
+    p_card_picker.add_condition(CardsSumsTo([10]))
+    #p_card_picker.add_condition(NumberOfMovedArtifacts(2))
+    player_phase.append_rule(Move(p_card_picker))
+    player_phase.append_rule(Pass())
+    end_turn = ChangePhase(refill_middle_phase, TablePlayerChooser())
+    player_phase.rules[0].append_next(end_turn)
+    player_phase.rules[1].append_next(end_turn)
+
+    return game
 

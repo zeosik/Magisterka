@@ -35,7 +35,7 @@ class PlayerInput:
     #Czy wymagamy czegos od gracza
     def requires_player_input(self, gamestate: GameState) -> bool:
         values = self.auto_submitted_values(gamestate)
-        auto_submitted = values is not None and len(values) > 0 and self.submit_choices(values)
+        auto_submitted = values is not None and self.submit_choices(values)
         return not auto_submitted
 
     #walidujemy to co wybiera gracz
