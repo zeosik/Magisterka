@@ -59,6 +59,12 @@ class GameState:
     def table_player(self) -> Player:
         return self.type_players_dict[self.model.table_type][0]
 
+    def number_of_players(self):
+        num = 0
+        for player_type in self.model.player_types:
+            num += len(self.players_for_type(player_type))
+        return num
+
     def is_current_phase_end_game_phase(self) -> bool:
         return self.current_phase() == self.model.end_phase
 
