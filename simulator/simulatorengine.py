@@ -102,9 +102,14 @@ class SimulatorEngine():
                 raise Exception()
         return rule
 
-def run(num_players, num_humans):
-    #game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
-    game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
+def run(game_name, num_players, num_humans):
+    if game_name=="5_10_15":
+        game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
+    elif game_name=="5_10_15_one_phase":
+        game = simpleGameWithOnePlayerType(example_5_10_15(False), num_players)
+    else: #game_name=="card_sequence":
+        game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
+    
     engine = SimulatorEngine(game, num_humans)
     engine.prepare_server_and_clients()
     engine.run()
