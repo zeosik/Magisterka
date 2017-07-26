@@ -1,6 +1,10 @@
 import logging
 
 
-def initloggerconfiguration():
+def initloggerconfiguration(debug: bool):
     FORMAT = '%(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+    if debug:
+        logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+    else:
+        logging.basicConfig(level=logging.INFO, format=FORMAT)
+

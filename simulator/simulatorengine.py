@@ -12,9 +12,10 @@ from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 
 
 class SimulatorEngine():
-    def __init__(self, gamestate: GameState):
+    def __init__(self, gamestate: GameState, num_humans):
         self.log = logging.getLogger(self.__class__.__name__)
         self.gamestate = gamestate
+        self.num_humans = num_humans
         self.server = Server(self.gamestate.number_of_players())
 
     def get_places(self, player_arg = None):
@@ -38,16 +39,15 @@ class SimulatorEngine():
 
     def prepare_server_and_clients(self):
         for index in range(self.gamestate.number_of_players()):
-            #if index == 0:
-            #    client = HumanClient("player" + str(index))
-            #else:
-            client = BotClient("player" + str(index))
+            if index < self.num_humans:
+                client = HumanClient("player" + str(index))
+            else:
+                client = BotClient("player" + str(index))
             client_thread = threading.Thread(target=client.run)
             client_thread.start()
         self.server.accept_clients()
 
     def run(self):
-        self.print_places(self.get_places())
         self.log.debug("Uruchamiam symulacje gry: " + self.gamestate.model.name)
         self.log.debug("Tura gracza: " + self.gamestate.current_player().name)
         self.log.debug("-Przechodze do fazy: " + self.gamestate.current_phase().name)
@@ -102,9 +102,9 @@ class SimulatorEngine():
                 raise Exception()
         return rule
 
-def run():
-    #game = simpleGameWithOnePlayerType(example_5_10_15(), 3)
-    game = simpleGameWithOnePlayerType(example_card_sequence(), 3)
-    engine = SimulatorEngine(game)
+def run(num_players, num_humans):
+    #game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
+    game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
+    engine = SimulatorEngine(game, num_humans)
     engine.prepare_server_and_clients()
     engine.run()
