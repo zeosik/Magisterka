@@ -1,5 +1,8 @@
 import logging
-from gi.overrides.Gtk import Gtk
+import gi
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 from common.model.gamemodel import GameModel
 from editor.widgets.itemspanel.itemspanel import ItemsPanel

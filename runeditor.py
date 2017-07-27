@@ -3,5 +3,5 @@ from editor import window
 
 
 if __name__ == "__main__":
-    initloggerconfiguration()
+    initloggerconfiguration(True)
     window.run()

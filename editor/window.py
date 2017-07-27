@@ -3,16 +3,7 @@ import sys
 import gi
 import logging
 
-from gi.overrides import Gdk
-from graph_tool import Graph
-from graph_tool.draw import GraphWidget, sfdp_layout
-
 from common.model.gamemodel import GameModel
-from common.model.phase import Phase
-from common.model.playertype import PlayerType
-from common.model.rules.changephase import ChangePhase
-from common.model.rules.ifrule import If
-from common.model.rules.rule import Rule
 from editor.windows.startwindow import StartWindow
 from editor.windows.viewmodelwindow import ViewModelWindow
 from example import example_5_10_15

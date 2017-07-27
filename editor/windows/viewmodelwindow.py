@@ -1,6 +1,8 @@
 import logging
+import gi
+from math import pi
 
-from gi.overrides import Gdk
+
 from graph_tool import Graph
 from graph_tool.draw import sfdp_layout, GraphWidget
 
@@ -12,7 +14,9 @@ from common.model.rules.changephase import ChangePhase
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
-from gi.repository import Gio, Gtk
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gio, Gtk, Gdk
 
 from example import example_5_10_15
 
@@ -96,6 +100,7 @@ class ViewModelWindow(Gtk.ApplicationWindow):
         graph = Graph()
         #graph.vp.pos = graph.new_vertex_property('vector<double>')
         graph.vp.name = graph.new_vertex_property('string')
+        graph.vp.fullname = graph.new_vertex_property('string')
         graph.vp.color = graph.new_vertex_property('string')
         graph.vp.shape = graph.new_vertex_property('string')
 
@@ -110,6 +115,7 @@ class ViewModelWindow(Gtk.ApplicationWindow):
             rule_vertex[rule] = vertex
             self.vertex_full_name[vertex] = rule.name
             graph.vp.name[vertex] = rule.__class__.__name__
+            graph.vp.fullname[vertex] = rule.name
             if rule is start:
                 color = self.start_rule_color()
             elif issubclass(rule.__class__, ChangePhase):
@@ -130,7 +136,7 @@ class ViewModelWindow(Gtk.ApplicationWindow):
             'fill_color': graph.vp.color,
             'shape': graph.vp.shape
         }
-        graph_widget = GraphWidget(graph, pos, vprops=vprops, vertex_size=50)
+        graph_widget = GraphWidget(graph, pos, display_props=[graph.vp.fullname], vprops=vprops, vertex_size=50)
         graph_widget.connect('button-release-event', self.on_vertex_clicked)
         self.phase_panel.pack_start(graph_widget, True, True, 0)
 
@@ -154,11 +160,14 @@ class ViewModelWindow(Gtk.ApplicationWindow):
         graph = Graph()
         graph.vp.name = graph.new_vertex_property('string')
         graph.vp.color = graph.new_vertex_property('string')
+        graph.vp.text_pos = graph.new_vertex_property('float')
+        graph.vp.text_off = graph.new_vertex_property('vector<float>')
         phase_vertex = {}
         for phase in all_phases:
             vertex = graph.add_vertex()
             phase_vertex[phase] = vertex
-            graph.vp.name[vertex] = phase.name
+            text = phase.name
+            graph.vp.name[vertex] = text
             if phase is model.start_phase:
                 color = self.start_rule_color()
             elif phase in model.table_type.phases:
@@ -166,6 +175,8 @@ class ViewModelWindow(Gtk.ApplicationWindow):
             else:
                 color = self.player_color()
             graph.vp.color[vertex] = color
+            graph.vp.text_pos[vertex] = pi / 2
+            graph.vp.text_off[vertex] = [0, 0]
 
         for phase in all_phases:
             for other in phase_phase[phase]:
@@ -175,7 +186,9 @@ class ViewModelWindow(Gtk.ApplicationWindow):
 
         vprops = {
             'text': graph.vp.name,
-            'fill_color': graph.vp.color
+            'fill_color': graph.vp.color,
+            'text_position': graph.vp.text_pos,
+            'text_offset': graph.vp.text_off
         }
 
         graph_widget = GraphWidget(graph, pos, vprops=vprops, vertex_size=50)

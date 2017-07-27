@@ -72,14 +72,14 @@ class GameState:
         if phase not in self.current_type.phases:
             self.log.error('current player does not have phase. current type: {0} current player: {1} phase: {2}'.format(self.current_type.name, self.current_player().name, phase.name))
         self.player_current_phase[self.current_player()] = phase
-        self.log.debug("      -Przechodze do fazy: " + phase.name)
+        self.log.debug(" -Przechodze do fazy: " + phase.name)
 
     def switch_player(self, player: Player, phase: Phase):
         self.current_type = self.model.get_player_type_for_phase(phase)
         if player not in self.type_players_dict[self.current_type]:
             self.log.error("something went wrong")
         self.type_current_player_dict[self.current_type] = self.type_players_dict[self.current_type].index(player)
-        self.log.debug("      Tura gracza: " + player.name)
+        self.log.debug(" Tura gracza: " + player.name)
         self.switch_phase(phase)
 
 
