@@ -7,7 +7,7 @@ from simulator.gamestate import GameState
 class FirstPlayerChooser(PlayerChooser):
 
     def __init__(self, for_type: PlayerType):
-        super().__init__('first-player chooser')
+        super().__init__('first {0}'.format(for_type.name))
         self.type = for_type
 
     def auto_submitted_values(self, gamestate: GameState) -> list:

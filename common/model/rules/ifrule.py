@@ -7,7 +7,7 @@ from simulator.gamestate import GameState
 
 class If(Rule):
     def __init__(self, condition: IfCondition, if_true: Rule, if_false: Rule):
-        super().__init__('If condition {0} then {1} else {2}'.format(condition.name, if_true.name, if_false.name))
+        super().__init__('If ({0})'.format(condition.name))
         self.log = logging.getLogger(self.__class__.__name__)
         self.if_true = []
         self.if_false = []

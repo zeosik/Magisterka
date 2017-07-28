@@ -6,7 +6,7 @@ from simulator.gamestate import GameState
 
 class ChangePhase(Rule):
     def __init__(self, to_phase:Phase, player_chooser: PlayerChooser):
-        super().__init__('Change phase to: {0} {1}'.format(to_phase.name, player_chooser.name))
+        super().__init__('{0} [{1}]'.format(player_chooser.name, to_phase.name))
         self.phase = to_phase
         self.player_chooser = player_chooser
         self.register_input(self.player_chooser)

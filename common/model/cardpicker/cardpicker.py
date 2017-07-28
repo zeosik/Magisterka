@@ -10,7 +10,7 @@ from simulator.gamestate import GameState
 class CardPicker(PlayerInput):
 
     def __init__(self, source_place_picker: PlacePicker, target_place_picker: PlacePicker, name: str = 'Card Picker'):
-        super().__init__('{0} from_place: {1}, to_place: {2}'.format(name, source_place_picker.name, target_place_picker.name))
+        super().__init__('{0} from: {1}, to: {2}'.format(name, source_place_picker.name, target_place_picker.name))
         self.source_place_picker = source_place_picker
         self.target_place_picker = target_place_picker
         self.conditions = []

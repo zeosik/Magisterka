@@ -13,6 +13,9 @@ class Rule:
     def apply(self, gamestate: GameState):
         pass
 
+    def simple_name(self) -> str:
+        return self.name
+
     def register_input(self, player_input: PlayerInput):
         self.inputs += (player_input.required_inputs())
         self.inputs.append(player_input)

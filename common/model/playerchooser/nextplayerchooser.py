@@ -20,9 +20,9 @@ class StepPlayerChooser(PlayerChooser):
 
 class NextPlayerChooser(StepPlayerChooser):
     def __init__(self, other: PlayerChooser):
-        super().__init__(other, 1, 'next-player chooser')
+        super().__init__(other, 1, 'next {0}'.format(other.name))
 
 
 class PreviousPlayerChooser(StepPlayerChooser):
     def __init__(self, other: PlayerChooser):
-        super().__init__(other, -1, 'prev-player chooser')
+        super().__init__(other, -1, 'prev {0}'.format(other.name))

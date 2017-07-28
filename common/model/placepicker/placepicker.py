@@ -6,10 +6,10 @@ from simulator.gamestate import GameState
 
 class PlacePicker(PlayerInput):
 
-    def __init__(self, playerpicker: PlayerChooser, place: Place):
-        super().__init__('Place Picker place: {0}, player: {1}'.format(place.name, playerpicker.name))
+    def __init__(self, player_picker: PlayerChooser, place: Place):
+        super().__init__('{0}-{1}'.format(player_picker.name, place.name))
         self.place = place
-        self.player_picker = playerpicker
+        self.player_picker = player_picker
         self.append_required_inputs(self.player_picker)
 
     def auto_submitted_values(self, gamestate: GameState) -> list:
