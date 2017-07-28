@@ -17,20 +17,20 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 
-class PhaseFlowWidget(Gtk.VBox):
-    def __init__(self):
-        super().__init__()
+class PhaseFlowWindow(Gtk.ApplicationWindow):
+    def __init__(self, app):
+        super().__init__(title='Phase flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
-
-        self.add(Gtk.Label(self.__class__.__name__))
+        self.set_size_request(600, 400)
+        self.main_panel = Gtk.VBox()
+        self.add(self.main_panel)
 
     def draw_for(self, phase: Phase, model: GameModel):
         self.log.debug('drawing phase flow {0}'.format(phase.name))
-        for child in self.get_children():
-            self.remove(child)
+        TMPUTILS.clear_container(self.main_panel)
 
         name = Gtk.Label(phase.name)
-        self.pack_start(name, False, False, 0)
+        self.main_panel.pack_start(name, False, False, 0)
 
         start = Rule('start {0}'.format(phase.name))
         start.next = phase.rules
@@ -45,12 +45,8 @@ class PhaseFlowWidget(Gtk.VBox):
             for rule in rule_list:
                 rules_set.add(rule)
 
-        # for rule in rules:
-        #    label = Gtk.Label(rule.name[:30])
-        #    self.phase_panel.pack_start(label, True, True, 0)
 
         graph = Graph()
-        # graph.vp.pos = graph.new_vertex_property('vector<double>')
         graph.vp.name = graph.new_vertex_property('string')
         graph.vp.fullname = graph.new_vertex_property('string')
         graph.vp.color = graph.new_vertex_property('string')
@@ -108,5 +104,5 @@ class PhaseFlowWidget(Gtk.VBox):
                                    vertex_size=50)
         #graph_widget.connect('button-release-event', self.on_vertex_clicked)
 
-        self.pack_start(graph_widget, True, True, 0)
-        self.show_all()
+        self.main_panel.pack_start(graph_widget, True, True, 0)
+        self.main_panel.show_all()

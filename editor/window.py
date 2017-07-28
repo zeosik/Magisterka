@@ -4,6 +4,8 @@ import gi
 import logging
 
 from common.model.gamemodel import GameModel
+from editor.windows.phaseflowwindow import PhaseFlowWindow
+from editor.windows.placemapwindow import PlaceMapWindow
 from editor.windows.startwindow import StartWindow
 from editor.windows.viewmodelwindow import ViewModelWindow
 from example import example_5_10_15
@@ -72,16 +74,18 @@ class EditorApplication(Gtk.Application):
     def __init__(self):
         super().__init__()
         self.log = logging.getLogger(self.__class__.__name__)
-        self.editor_window = None
+        #self.editor_window = None
         self.view_model_window = None
         self.start_window = None
+        self.phase_flow_window = None
+        self.place_map_window = None
 
     def do_activate(self):
-        self.editor_window = EditorWindow(self)
-        self.view_model_window = ViewModelWindow(self, self.show_start_window)
+        #self.editor_window = EditorWindow(self)
+        self.phase_flow_window = PhaseFlowWindow(self)
+        self.view_model_window = ViewModelWindow(self, self.show_start_window, self.phase_flow_window.draw_for)
         self.start_window = StartWindow(self, self.show_game_model)
-        #self.view_model_window.show_all()
-        #self.load_example_5_10_15(None, None)
+        self.place_map_window = PlaceMapWindow(self)
         self.show_start_window()
 
     def do_startup(self):
@@ -106,17 +110,23 @@ class EditorApplication(Gtk.Application):
         self.view_model_window.show_model(model)
         self.view_model_window.show_all()
 
+        self.phase_flow_window.draw_for(model.start_phase, model)
+        self.phase_flow_window.show_all()
+
+        self.place_map_window.draw_for(model)
+        self.place_map_window.show_all()
+
     def show_start_window(self):
         self.start_window.show_all()
         self.view_model_window.hide()
-        self.editor_window.hide()
+        #self.editor_window.hide()
 
 
     def load_example_5_10_15(self, action, param):
         self.log.debug('loading example')
         model = example_5_10_15(False)
-        self.editor_window.load_model(model)
-        self.editor_window.hide()
+        #self.editor_window.load_model(model)
+        #self.editor_window.hide()
 
         self.view_model_window.show_model(model)
         self.view_model_window.show_all()
