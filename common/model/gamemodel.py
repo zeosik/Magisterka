@@ -30,3 +30,9 @@ class GameModel:
             if phase in type.phases:
                 return type
         self.log.error("couldn't find type for phase: {0}".format(phase.name))
+
+    def all_player_types(self):
+        return self.player_types + [self.table_type]
+
+    def all_phases(self):
+        return set([phase for type in self.all_player_types() for phase in type.phases])

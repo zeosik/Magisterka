@@ -9,6 +9,11 @@ class Mediator:
 
         self.clear_state = MediatorOperation('clear state')
 
+        #
+        self.phase_select = MediatorOperation('phase select')
+        self.rule_select = MediatorOperation('rule select')
+        self.model_select = MediatorOperation('model select')
+
 
 class MediatorTopic:
     def __init__(self, name):

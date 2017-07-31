@@ -6,6 +6,7 @@ from graph_tool.draw import sfdp_layout, GraphWidget
 
 from common.model.gamemodel import GameModel
 from common.model.playertype import PlayerType
+from editor.mediator import Mediator
 from editor.windows.tmputils import TMPUTILS
 
 gi.require_version('Gtk', '3.0')
@@ -13,20 +14,19 @@ from gi.repository import Gtk, Gdk
 
 
 class ViewModelWindow(Gtk.ApplicationWindow):
-    def __init__(self, app, show_start_window, show_phase):
-        super().__init__(title='View Model', application=app)
+    def __init__(self, app, show_start_window, mediator: Mediator):
+        super().__init__(title='Game Flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
         #self.set_position(Gtk.WindowPosition.CENTER)
         self.set_size_request(800, 400)
         self.move(0, 500)
         self.player_types_panel = Gtk.VBox()
         self.main_panel = Gtk.HBox()
-        self.show_phase = show_phase
+        self.mediator = mediator
+        self.mediator.model_select.register(self.show_model)
 
         start_button = Gtk.Button('<- Start')
         start_button.connect('clicked', lambda w: show_start_window())
-
-        self.model = None
 
         self.buttons_panel = Gtk.VBox()
         self.buttons_panel.pack_start(start_button, False, False, 0)
@@ -59,7 +59,7 @@ class ViewModelWindow(Gtk.ApplicationWindow):
         box = self.box_with_label(player_type.name, color)
         container.pack_start(box, True, True, 0)
         phases = Gtk.ListBox()
-        phases.connect('row-activated', lambda lb, row: self.show_phase(row.object, self.model))
+        phases.connect('row-activated', lambda lb, row: self.mediator.phase_select.fire(self, row.object))
         for phase in player_type.phases:
             row = Gtk.ListBoxRow()
             row.add(Gtk.Label(phase.name))
@@ -69,13 +69,12 @@ class ViewModelWindow(Gtk.ApplicationWindow):
         container.pack_start(phases, True, True, 0)
         return container
 
-    def show_model(self, model: GameModel):
+    def show_model(self, sender, model: GameModel):
         TMPUTILS.clear_container(self.player_types_panel)
         for player_type in [model.table_type] + model.player_types:
             color = TMPUTILS.table_color() if model.table_type is player_type else TMPUTILS.player_color()
             panel = self.create_player_type_panel(player_type, color)
             self.player_types_panel.pack_start(panel, True, True, 0)
-        self.model = model
         self.draw_game_flow(model)
 
     def draw_game_flow(self, model: GameModel):

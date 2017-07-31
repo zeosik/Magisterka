@@ -82,10 +82,11 @@ class EditorApplication(Gtk.Application):
 
     def do_activate(self):
         #self.editor_window = EditorWindow(self)
-        self.phase_flow_window = PhaseFlowWindow(self)
-        self.view_model_window = ViewModelWindow(self, self.show_start_window, self.phase_flow_window.draw_for)
-        self.start_window = StartWindow(self, self.show_game_model)
-        self.place_map_window = PlaceMapWindow(self)
+        mediator = Mediator()
+        self.phase_flow_window = PhaseFlowWindow(self, mediator)
+        self.view_model_window = ViewModelWindow(self, self.show_start_window, mediator)
+        self.start_window = StartWindow(self, mediator)
+        self.place_map_window = PlaceMapWindow(self, mediator)
         self.show_start_window()
 
     def do_startup(self):
@@ -107,14 +108,6 @@ class EditorApplication(Gtk.Application):
 
     def show_game_model(self, model: GameModel):
         self.start_window.hide()
-        self.view_model_window.show_model(model)
-        self.view_model_window.show_all()
-
-        self.phase_flow_window.draw_for(model.start_phase, model)
-        self.phase_flow_window.show_all()
-
-        self.place_map_window.draw_for(model)
-        self.place_map_window.show_all()
 
     def show_start_window(self):
         self.start_window.show_all()

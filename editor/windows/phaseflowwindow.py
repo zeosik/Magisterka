@@ -11,6 +11,7 @@ from common.model.phase import Phase
 from common.model.rules.changephase import ChangePhase
 from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
+from editor.mediator import Mediator
 from editor.windows.tmputils import TMPUTILS
 
 gi.require_version('Gtk', '3.0')
@@ -18,12 +19,25 @@ from gi.repository import Gtk
 
 
 class PhaseFlowWindow(Gtk.ApplicationWindow):
-    def __init__(self, app):
+    def __init__(self, app, mediator: Mediator):
         super().__init__(title='Phase flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
         self.set_size_request(600, 400)
+        self.move(0, 0)
         self.main_panel = Gtk.VBox()
         self.add(self.main_panel)
+        self.mediator = mediator
+        self.mediator.phase_select.register(self.on_phase_select)
+        self.mediator.model_select.register(self.on_model_select)
+        self.model = None
+        self.graph_widget = None
+
+    def on_model_select(self, sender, model):
+        self.model = model
+        self.draw_for(model.start_phase, model)
+
+    def on_phase_select(self, sender, phase):
+        self.draw_for(phase, self.model)
 
     def draw_for(self, phase: Phase, model: GameModel):
         self.log.debug('drawing phase flow {0}'.format(phase.name))
@@ -59,12 +73,12 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         graph.ep.text_color = graph.new_edge_property('string')
 
         rule_vertex = {}
-        self.vertex_full_name = {}
+        self.vertex_rule = {}
 
         for rule in rules_set:
             vertex = graph.add_vertex()
             rule_vertex[rule] = vertex
-            self.vertex_full_name[vertex] = rule.name
+            self.vertex_rule[vertex] = rule
             graph.vp.name[vertex] = rule.simple_name()
             graph.vp.fullname[vertex] = rule.name
             if rule is start:
@@ -100,9 +114,15 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             'text': graph.ep.text,
             'text_color': graph.ep.text_color
         }
-        graph_widget = GraphWidget(graph, pos, display_props=[graph.vp.fullname], vprops=vprops, eprops=eprops,
+        self.graph_widget = GraphWidget(graph, pos, display_props=[graph.vp.fullname], vprops=vprops, eprops=eprops,
                                    vertex_size=50)
-        #graph_widget.connect('button-release-event', self.on_vertex_clicked)
+        #jest cos takiego jak GraphWidget.key_press_callback ale u mnie nie dziala...
+        self.graph_widget.connect('button-release-event', self.on_vertex_clicked)
 
-        self.main_panel.pack_start(graph_widget, True, True, 0)
-        self.main_panel.show_all()
+        self.main_panel.pack_start(self.graph_widget, True, True, 0)
+        self.show_all()
+
+    def on_vertex_clicked(self, widget, event):
+        vertex = widget.picked
+        if vertex != False:
+            self.mediator.rule_select.fire(self, self.vertex_rule[vertex])

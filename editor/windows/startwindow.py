@@ -1,6 +1,8 @@
 import logging
 import gi
 
+from editor.mediator import Mediator
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -10,24 +12,28 @@ from example import example_5_10_15, example_card_sequence
 
 
 class StartWindow(Gtk.ApplicationWindow):
-    def __init__(self, app, on_game_model_select):
+    def __init__(self, app, mediator: Mediator):
         super().__init__(title='Start', application= app)
         self.log = logging.getLogger(self.__class__.__name__)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_size_request(600, 480)
         self.connect('delete_event', app.on_quit)
-        self.on_game_model_select = on_game_model_select
+        self.mediator = mediator
+        self.mediator.model_select.register(self.hide_widnow)
 
         self.panel = Gtk.VBox()
 
         for wariant_name, games in self.game_examples().items():
-            panel = ItemsPanel(wariant_name, None, self.on_example_select)
+            panel = ItemsPanel(wariant_name, None, self.mediator.model_select.fire)
 
             for game_name, game in games.items():
                 panel.list_box.add_item(game, game_name)
             self.panel.pack_start(panel, True, True, 0)
 
         self.add(self.panel)
+
+    def hide_widnow(self, sender, obj):
+        self.hide()
 
     def game_examples(self) -> dict:
         games_5_10_15 = {
@@ -41,6 +47,3 @@ class StartWindow(Gtk.ApplicationWindow):
             '5-10-15': games_5_10_15,
             'komplet kart': games_two_paies
         }
-
-    def on_example_select(self, sender, game_model: GameModel):
-        self.on_game_model_select(game_model)
