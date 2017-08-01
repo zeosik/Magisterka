@@ -3,7 +3,7 @@ from math import pi
 import gi
 import logging
 
-from graph_tool import Graph
+from graph_tool import Graph, PropertyMap
 from graph_tool.draw import GraphWidget, sfdp_layout
 
 from common.model.gamemodel import GameModel
@@ -123,6 +123,9 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         self.show_all()
 
     def on_vertex_clicked(self, widget, event):
-        vertex = widget.picked
-        if vertex != False:
-            self.mediator.rule_select.fire(self, self.vertex_rule[vertex])
+        if widget.picked is not None:
+            if type(widget.picked) == PropertyMap:
+                rules = [self.vertex_rule[v] for v in self.vertex_rule.keys() if widget.picked[v]]
+            else:
+                rules = [self.vertex_rule[widget.picked]]
+            self.mediator.rule_selects.fire(self, rules)

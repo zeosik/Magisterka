@@ -123,5 +123,5 @@ class ViewModelWindow(Gtk.ApplicationWindow):
         graph_widget = GraphWidget(graph, pos, vprops=vprops, vertex_size=50)
         self.game_flow_panel.pack_start(Gtk.Label('gameflow'), False, False, 0)
         self.game_flow_panel.pack_start(graph_widget, True, True, 0)
-        #self.show_all()
+        self.show_all()
 

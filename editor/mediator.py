@@ -11,7 +11,7 @@ class Mediator:
 
         #
         self.phase_select = MediatorOperation('phase select')
-        self.rule_select = MediatorOperation('rule select')
+        self.rule_selects = MediatorOperation('rule select')
         self.model_select = MediatorOperation('model select')
 
 
@@ -34,6 +34,6 @@ class MediatorOperation:
         self.listeners.append(listener)
 
     def fire(self, sender, value):
-        self.log.debug('firing operation: {0}'.format(self.name))
+        self.log.debug('firing operation: {0} val: {1}'.format(self.name, str(value)))
         for listener in self.listeners:
             listener(sender, value)

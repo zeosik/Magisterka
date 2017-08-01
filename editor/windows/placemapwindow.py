@@ -26,7 +26,7 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
         self.mediator = mediator
         self.mediator.model_select.register(self.draw_for)
         self.mediator.phase_select.register(self.on_phase_select)
-        self.mediator.rule_select.register(self.on_rule_select)
+        self.mediator.rule_selects.register(self.on_rules_select)
 
         self.rule_edge = None
         self.last_highlighted_edges = []
@@ -94,8 +94,13 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
 
         self.highlight_edges(edges)
 
-    def on_rule_select(self, sender, rule):
-        self.highlight_edges(self.rule_edge[rule] if rule in self.rule_edge else [])
+    def on_rules_select(self, sender, rules):
+        edges = []
+        for rule in rules:
+            if rule in self.rule_edge:
+                edges += self.rule_edge[rule]
+        #edges = [self.rule_edge[rule] if rule in self.rule_edge else [] for rule in rules]
+        self.highlight_edges(edges)
 
     def highlight_edges(self, edges):
         self.log.debug('highlighting edges')
@@ -107,8 +112,7 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
             self.graph.ep.color[edge] = [0, 0, 255, 0.8]
             self.last_highlighted_edges.append(edge)
 
-        # TODO nie wiem czemu ale to nie dziala,
-        # TODO i trzeba przesunac jakis wierzcholek zeby zadzialalo odrysowanie na nowo -.-
+        self.graph_widget.regenerate_surface()
         self.graph_widget.queue_draw()
 
     def edge_info_for_phase(self, phase):
