@@ -1,6 +1,7 @@
 from common.articaft_generators.cardgenerator import CardGenerator
 from common.model.cardpicker.duplicaterankcardpicker import DuplicateRankCardPicker
 from common.model.cardpicker.topcardfillpicker import TopCardFillPicker
+from common.model.cardpicker.allcardpicker import AllCardPicker
 from common.model.conditions.artifactsinplaceequal import ArtifactsInPlaceEqual
 from common.model.conditions.artifactsinplacelessthen import ArtifactsInPlaceLessThen
 from common.model.conditions.emptyplace import EmptyPlace
@@ -63,9 +64,7 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     #faza - rozdanie poczatkowe
 
     phase_start.append_rule(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
-    #Move(from_player_type, from_player_in_this_type, from_pile_in_this_player, to_player_type, to_player, to_pile)
     #Player -> Rule
-    #give_5_cards = lambda playerChooser: OldMove(TablePlayerChooser(), deck, playerChooser, player_hand, TopCardPickerOld(5))
     give_5_cards = lambda playerChooser: Move(TopCardPicker(5, PlacePicker(TablePlayerChooser(), deck), PlacePicker(playerChooser, player_hand)))
     phase_start.rules[0].append_next(ForEachPlayer(player_type, give_5_cards))
     phase_start.rules[0].next[0].append_next(ChangePhase(phase1, FirstPlayerChooser(player_type)))
@@ -79,12 +78,15 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
         to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
     else:
         to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-    phase_choose_player.append_rule(to_player_turn)
+
+    reshuffle_deck_rule = Move(AllCardPicker(PlacePicker(TablePlayerChooser(), discard_pile), PlacePicker(TablePlayerChooser(), deck)))
+    reshuffle_deck_rule.append_next(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
+    reshuffle_deck_rule.next[0].append_next(to_player_turn)
+    phase_choose_player.append_rule(If(EmptyPlace(PlacePicker(TablePlayerChooser(), deck)), reshuffle_deck_rule, to_player_turn))
 
     #faza - sprawdzenie wygranej
     phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , ChangePhase(phase_choose_player, TablePlayerChooser())))
-    #phase_win_check.append_rule(If(IfCounter(3), to_player_turn, ChangePhase(phase_end, TablePlayerChooser())))
-
+ 
     #faza - tura gracza
     source_place_picker = PlacePicker(CurrentPlayerChooser(player_type), player_hand)
     target_place_picker = PlacePicker(TablePlayerChooser(), discard_pile)
@@ -97,7 +99,6 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
         phase1.append_rule(Pass())
     else:
         phase1.append_rule(take_card_from_deck)
-    #phase1.append_rule(take_card_from_deck)
     phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
     phase1.rules[0].append_next(phase1_endturn)
     phase1.rules[1].append_next(phase1_endturn)
@@ -155,8 +156,7 @@ def example_card_sequence():
     full_middle = ArtifactsInPlaceEqual(8, PlacePicker(TablePlayerChooser(), middle))
     move_middle_to_discard = Move(TopCardPicker(8, PlacePicker(TablePlayerChooser(), middle), PlacePicker(TablePlayerChooser(), discard)))
     less_then_8_cards_in_deck = ArtifactsInPlaceLessThen(8, PlacePicker(TablePlayerChooser(), deck))
-    #TODO moze allcardspicker?
-    move_discard_to_deck = Move(TopCardFillPicker(40, discard_picker, deck_picker))
+    move_discard_to_deck = Move(AllCardPicker(discard_picker, deck_picker))
     shuffle_deck = Shuffle(deck_picker)
     move_discard_to_deck.append_next(shuffle_deck)
     fill_middle_cards = Move(TopCardFillPicker(8, deck_picker, middle_picker))
