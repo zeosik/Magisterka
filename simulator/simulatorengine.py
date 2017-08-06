@@ -9,14 +9,18 @@ from simulator.network.botclient import BotClient
 from simulator.network.humanclient import HumanClient
 from example import example_5_10_15, example_card_sequence
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
+from analyzer.singlegameanalyzer import SingleGameAnalyzer
 
 
 class SimulatorEngine():
-    def __init__(self, gamestate: GameState, num_humans):
+    def __init__(self, gamestate: GameState, num_humans, analyze_game):
         self.log = logging.getLogger(self.__class__.__name__)
         self.gamestate = gamestate
         self.num_humans = num_humans
+        self.analyze_game = analyze_game
         self.server = Server(self.gamestate.number_of_players())
+        if self.analyze_game:
+            self.analyzer = SingleGameAnalyzer()
 
     def get_places(self, player_arg = None):
         all_places = dict()
@@ -31,8 +35,9 @@ class SimulatorEngine():
         return all_places
 
     def print_places(self, places):
-        for place in sorted(places):
-            print (place + ": " + " ".join([artifact.name for artifact in places[place]]))
+        if not self.analyze_game:
+            for place in sorted(places):
+                print (place + ": " + " ".join([artifact.name for artifact in places[place]]))
 
     def print_places_for_player(self, player: Player):
         self.print_places(self.get_places(player))
@@ -54,6 +59,9 @@ class SimulatorEngine():
 
         last_phase = None
         while not self.gamestate.is_current_phase_end_game_phase():
+
+            if self.analyze_game:
+                self.analyzer.run_analysis(self.gamestate)
 
             if last_phase is not self.gamestate.current_phase():
                 all_rules = self.gamestate.current_phase().rules
@@ -88,6 +96,9 @@ class SimulatorEngine():
         self.server.close_connections()
         self.log.debug("Koncze symulacje")
         self.print_places(self.get_places())
+        
+        if self.analyze_game:
+            return self.analyzer
 
     def table_turn(self, rule_picker: RulePicker) -> Rule:
         if rule_picker.requires_player_input(self.gamestate):
@@ -102,7 +113,7 @@ class SimulatorEngine():
                 raise Exception()
         return rule
 
-def run(game_name, num_players, num_humans):
+def run(game_name, num_players, num_humans, analyze_game = False):
     if game_name=="5_10_15":
         game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
     elif game_name=="5_10_15_one_phase":
@@ -110,6 +121,6 @@ def run(game_name, num_players, num_humans):
     else: #game_name=="card_sequence":
         game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
     
-    engine = SimulatorEngine(game, num_humans)
+    engine = SimulatorEngine(game, num_humans, analyze_game)
     engine.prepare_server_and_clients()
-    engine.run()
+    return engine.run()

@@ -1,7 +1,7 @@
 import logging, argparse
 
 from common.initlogger import initloggerconfiguration
-from simulator import simulatorengine
+from analyzer import analyzer
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -13,18 +13,4 @@ if __name__ == "__main__":
 
     initloggerconfiguration(False)
 
-    for n in range(args.num_simulations):
-        print()
-        print("Iteracja:", n + 1)
-        print()
-        simulatorengine.run(args.game_name, args.num_players, 0)
-
-    #Analizujemy gre dla konkretnej liczby graczy, czy sprawdzamy jak się zachowuje gdy graczy jest mniej i wiecej?
-
-    #CO ANALIZOWAĆ - POMYSŁY:
-    # - liczba tur w każdej grze - czy jest ich dużo czy mało
-    # - liczba tur w każdej grze - jak bardzo się wacha w zależności od kart
-    # - średnia ilość wszystkich ruchów w turze
-    # - średnia ilość dozwolonych ruchów w turze
-    # - kto wygrywa (może gra jest nie fair i np pierwszy gracz ma łatwiej)
-    # - procent wykorzystanych kart (ila kart zostało nieodkrytych) - tylko po co to nam? :P
+    analyzer.run(args.game_name, args.num_players, args.num_simulations)
