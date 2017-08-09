@@ -10,4 +10,4 @@ class AllCardPicker(CardPicker):
 
     def auto_submitted_values(self, gamestate: GameState) -> list:
         place = self.source_place_picker.submitted()
-        return place.artifacts
+        return place.artifacts()

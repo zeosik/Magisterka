@@ -1,4 +1,6 @@
 import logging
+
+import collections
 import gi
 
 from editor.mediator import Mediator
@@ -8,7 +10,7 @@ from gi.repository import Gtk
 
 from common.model.gamemodel import GameModel
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
-from example import example_5_10_15, example_card_sequence
+from example import example_5_10_15, example_card_sequence, example_remik
 
 
 class StartWindow(Gtk.ApplicationWindow):
@@ -43,7 +45,11 @@ class StartWindow(Gtk.ApplicationWindow):
         games_two_paies = {
             'standard': example_card_sequence()
         }
-        return {
-            '5-10-15': games_5_10_15,
-            'komplet kart': games_two_paies
+        games_remik = {
+            'standard': example_remik()
         }
+        games = collections.OrderedDict()
+        games['5-10-15'] = games_5_10_15
+        games['komplet kart'] = games_two_paies
+        games['remik'] =  games_remik
+        return games

@@ -22,7 +22,7 @@ class CardPicker(PlayerInput):
 
     def all_choices(self, gamestate: GameState):
         place = self.source_place_picker.submitted()
-        return place.artifacts
+        return place.artifacts()
 
     def submit_choices(self, choices: list) -> Tuple[bool, str]:
         from_place = self.source_place_picker.submitted()

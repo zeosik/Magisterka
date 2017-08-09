@@ -21,5 +21,5 @@ class Move(Rule):
         place_to = self.card_picker.target_place_picker.submitted()
 
         for card in cards:
-            place_from.artifacts.remove(card)
-            place_to.artifacts.append(card)
+            place_from.remove_artifact(card)
+            place_to.add_artifact(card)

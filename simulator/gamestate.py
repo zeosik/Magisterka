@@ -27,10 +27,13 @@ class GameState:
         self.player_current_phase[self.current_player()] = model.start_phase
 
     def actual_place(self, player:Player, to_find_place: Place):
-        for place in player.places:
-            if to_find_place.name == place.name:
-                return place
+        matched = [place for place in player.places if place.name == to_find_place.name]
+        if len(matched) == 1:
+            return matched[0]
+        else:
+            self.log.error('too many places')
         self.log.error('could not find place: {0} for player: {1}'.format(to_find_place.name, player.name))
+        raise Exception()
 
     def is_current_player_table_player(self):
         return self.current_player() == self.table_player()

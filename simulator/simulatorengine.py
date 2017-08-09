@@ -7,7 +7,7 @@ from common.model.rules.rulepicker import RulePicker
 from simulator.network.server import Server
 from simulator.network.botclient import BotClient
 from simulator.network.humanclient import HumanClient
-from example import example_5_10_15, example_card_sequence
+from example import example_5_10_15, example_card_sequence, example_remik
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 from analyzer.singlegameanalyzer import SingleGameAnalyzer
 
@@ -118,8 +118,12 @@ def run(game_name, num_players, num_humans, analyze_game = False):
         game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
     elif game_name=="5_10_15_one_phase":
         game = simpleGameWithOnePlayerType(example_5_10_15(False), num_players)
-    else: #game_name=="card_sequence":
+    elif game_name=="card_sequence":
         game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
+    elif game_name=="remik":
+        game = simpleGameWithOnePlayerType(example_remik(), num_players)
+    else:
+        raise Exception("game name not implemented")
     
     engine = SimulatorEngine(game, num_humans, analyze_game)
     engine.prepare_server_and_clients()

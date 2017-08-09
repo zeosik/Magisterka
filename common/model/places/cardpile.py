@@ -2,15 +2,15 @@ from common.model.places.cardplace import CardPlace
 from common.model.artifacts.card import UnknownCard
 
 class CardPile(CardPlace):
-    def __init__(self, name, starting_artifacts = []):
+    def __init__(self, name, starting_artifacts = None):
         super().__init__(name, starting_artifacts)
 
     # to jesy stos, wiec widac tylko górna kartę
     def get_cards_type_specific(self, player = None):
-        if len(self.artifacts) == 0:
+        if len(self.artifacts()) == 0:
             return []
 
-        return [UnknownCard()] * (len(self.artifacts) -1) + [self.artifacts[-1]]
+        return [UnknownCard()] * (len(self.artifacts()) -1) + [self.artifacts()[-1]]
 
 
 class FaceDownCardPile(CardPile):

@@ -11,7 +11,7 @@ class TopCardFillPicker(TopCardPicker):
 
     def auto_submitted_values(self, gamestate: GameState):
         to_place = self.target_place_picker.submitted()
-        self.card_count = self.fill_to_card_count - len(to_place.artifacts)
+        self.card_count = self.fill_to_card_count - len(to_place.artifacts())
         if self.card_count > 0:
             return super().auto_submitted_values(gamestate)
         return []

@@ -15,6 +15,16 @@ class UnknownCard(Artifact):
 class Card(Artifact):
 
     def __init__(self, rank: int, color: CardColor):
-        super().__init__(str(rank) + color.name[0])
+        super().__init__(Card.display_name(rank, color))
         self.rank = rank
         self.color = color
+
+    @staticmethod
+    def display_name(rank, color) -> str:
+        rank_map = {
+            11: 'J',
+            12: 'Q',
+            13: 'K',
+            14: 'A',
+        }
+        return rank_map.get(rank, str(rank)) + color.name[0]

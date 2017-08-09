@@ -15,7 +15,7 @@ class DuplicateRankCardPicker(CardPicker):
 
         unique_ranks = set()
         duplicates = []
-        for x in place.artifacts:
+        for x in place.artifacts():
             if x.rank not in unique_ranks:
                 unique_ranks.add(x.rank)
             else:

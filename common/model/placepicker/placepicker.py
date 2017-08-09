@@ -15,3 +15,6 @@ class PlacePicker(PlayerInput):
     def auto_submitted_values(self, gamestate: GameState) -> list:
         player = self.player_picker.submitted()
         return [gamestate.actual_place(player, self.place)]
+
+    def submitted(self) -> Place:
+        return super().submitted()

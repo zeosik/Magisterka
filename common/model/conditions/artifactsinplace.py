@@ -20,4 +20,4 @@ class ArtifactsInPlace(IfCondition):
             i.requires_player_input(gamestate)
         self.place_picker.requires_player_input(gamestate)
         place = self.place_picker.submitted()
-        return self.comparator(len(place.artifacts), self.number)
+        return self.comparator(len(place.artifacts()), self.number)

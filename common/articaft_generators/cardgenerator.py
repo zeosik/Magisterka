@@ -9,3 +9,7 @@ class CardGenerator():
     @staticmethod
     def cards(min_rank:int , max_rank: int, colors: list):
         return [Card(rank, color) for rank in range(min_rank, max_rank + 1) for color in colors]
+
+    @staticmethod
+    def cards_standard_52():
+        return CardGenerator.cards(1, 14, list(CardColor))

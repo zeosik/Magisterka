@@ -2,11 +2,11 @@ from common.model.places.cardplace import CardPlace
 from common.model.artifacts.card import UnknownCard
 
 class CardLine(CardPlace):
-    def __init__(self, name, starting_artifacts = []):
+    def __init__(self, name, starting_artifacts = None):
         super().__init__(name, starting_artifacts)
         
     def get_cards_type_specific(self, player = None):
-        return self.artifacts
+        return self.artifacts()
 
 
 class FaceDownCardLine(CardLine):

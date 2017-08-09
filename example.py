@@ -8,6 +8,9 @@ from common.model.conditions.emptyplace import EmptyPlace
 from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
 from common.model.conditions.moveconditions.numberofmovedartifacts import NumberOfMovedArtifacts
 from common.model.conditions.newround import NewRound
+from common.model.placepicker.lastgroupplacepicker import LastGroupPlacePicker
+from common.model.places.place import Place
+from common.model.places.placegroup import PlaceGroup
 from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.playerchooser.firstplayerchooser import FirstPlayerChooser
 from common.model.playerchooser.nextplayerchooser import NextPlayerChooser
@@ -27,6 +30,7 @@ from common.model.rules.changephase import ChangePhase
 from common.model.rules.foreachplayer import ForEachPlayer
 from common.model.rules.ifrule import If
 from common.model.rules.move import Move
+from common.model.rules.preparenewplaceinplacegroup import PrepareNewPlaceInPlaceGroup
 from common.model.rules.shuffle import Shuffle
 
 
@@ -192,3 +196,81 @@ def example_card_sequence():
 
     return game
 
+#TODO moze jakies anotacje i szukanie gier po anotacjach albo pobieranie z jakiegos folderu
+def example_remik() -> GameModel:
+    #TODO max players 3 na talie?
+    game = GameModel('remik')
+
+    #typy
+    table_type = game.add_table_type(PlayerType('table-type'))
+    player_type = game.add_player_type(PlayerType('player-type'))
+
+    # rekwizyty
+    cards = CardGenerator.cards_standard_52()
+
+    # miejsca
+    deck = table_type.add_place(FaceDownCardPile('deck', cards))
+    discard = table_type.add_place(FaceUpCardPile('discard'))
+
+    deck_picker = PlacePicker(TablePlayerChooser(), deck)
+    discard_picker = PlacePicker(TablePlayerChooser(), discard)
+
+    hand = player_type.add_place(PlayerCardLine('hand'))
+    hand_current_player_picker = PlacePicker(CurrentPlayerChooser(player_type), hand)
+
+    played_cards_template = PlayerCardLine('played_cards')
+    played_cards = PlaceGroup(played_cards_template)
+    player_type.add_place(played_cards)
+
+
+    # fazy stołu
+    start = table_type.add_phase(Phase('start'))
+    win_check = table_type.add_phase(Phase('victory check'))
+    choose_player = table_type.add_phase(Phase('choose-player'))
+    end = table_type.add_phase(Phase('end'))
+
+    game.start_phase = start
+    game.end_phase = end
+
+    # fazy graczy
+    play = player_type.add_phase(Phase('play'))
+
+    #start
+    start.append_rule(Shuffle(deck_picker))
+    start.rules[0].append_next(ForEachPlayer(player_type, give_n_cards(13, deck_picker, hand)))
+    start.rules[0].next[0].append_next(ChangePhase(play, FirstPlayerChooser(player_type)))
+
+    #win check
+    to_end_game = ChangePhase(end, TablePlayerChooser())
+    to_choose_player = ChangePhase(choose_player, TablePlayerChooser())
+    win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), hand)), to_end_game, to_choose_player))
+
+    #choose player
+    choose_player.append_rule(ChangePhase(play, NextPlayerChooser(CurrentPlayerChooser(player_type))))
+
+    #end
+
+    #play
+    take_card_from_deck = Move(TopCardPicker(1, deck_picker, hand_current_player_picker))
+    play.append_rule(take_card_from_deck)
+    end_turn = ChangePhase(win_check, TablePlayerChooser())
+    discard_card_card_picker = CardPicker(hand_current_player_picker, discard_picker)
+    discard_card_card_picker.add_condition(NumberOfMovedArtifacts(1))
+    discard_card = Move(discard_card_card_picker)
+    discard_card.append_next(end_turn)
+    create_new_pile = PrepareNewPlaceInPlaceGroup(PlacePicker(CurrentPlayerChooser(player_type), played_cards))
+    create_new_pile_card_picker = CardPicker(hand_current_player_picker, LastGroupPlacePicker(CurrentPlayerChooser(player_type), played_cards))
+    #card_picker.add_condition()
+    create_new_pile.append_next(Move(create_new_pile_card_picker))
+    create_new_pile.next[0].append_next(discard_card)
+
+
+    take_card_from_deck.append_next(create_new_pile)
+
+    take_card_from_deck.append_next(discard_card)
+
+    return game
+
+
+def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Place):
+    return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
