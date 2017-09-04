@@ -7,3 +7,6 @@ class Parameter:
     
     def result(self):
         return None
+
+    def aggregate(self, analyzers):
+        return None

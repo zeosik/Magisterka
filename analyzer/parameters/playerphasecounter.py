@@ -1,4 +1,5 @@
 from analyzer.parameters.parameter import Parameter
+import numpy
 
 class PlayerPhaseCounter(Parameter):
     def __init__(self):
@@ -20,3 +21,12 @@ class PlayerPhaseCounter(Parameter):
 
     def result(self):
         return self.count
+
+    def aggregate(self, analyzers):
+        values = []
+        for a in analyzers:
+            values.append(a.parameters[self.name].result())
+        results = []
+        results.append((self.name + " - srednia", numpy.average(values)))
+        results.append((self.name + " - wariancja", numpy.var(values)))
+        return results

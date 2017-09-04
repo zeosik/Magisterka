@@ -11,6 +11,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    initloggerconfiguration(False)
+    initloggerconfiguration(logging.ERROR)
 
     analyzer.run(args.game_name, args.num_players, args.num_simulations)

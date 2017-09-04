@@ -35,9 +35,8 @@ class SimulatorEngine():
         return all_places
 
     def print_places(self, places):
-        if not self.analyze_game:
-            for place in sorted(places):
-                print (place + ": " + " ".join([artifact.name for artifact in places[place]]))
+        for place in sorted(places):
+            self.log.info(place + ": " + " ".join([artifact.name for artifact in places[place]]))
 
     def print_places_for_player(self, player: Player):
         self.print_places(self.get_places(player))
@@ -96,8 +95,10 @@ class SimulatorEngine():
         self.server.close_connections()
         self.log.debug("Koncze symulacje")
         self.print_places(self.get_places())
-        
+        self.log.info("Wygral " + self.gamestate.current_player_for_type(self.gamestate.model.player_types[0]).name)
+                
         if self.analyze_game:
+            self.analyzer.run_end_game_analysis(self.gamestate)
             return self.analyzer
 
     def table_turn(self, rule_picker: RulePicker) -> Rule:

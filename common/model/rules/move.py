@@ -23,3 +23,5 @@ class Move(Rule):
         for card in cards:
             place_from.remove_artifact(card)
             place_to.add_artifact(card)
+            if not card.was_moved_at_least_once:
+                card.was_moved_at_least_once = True

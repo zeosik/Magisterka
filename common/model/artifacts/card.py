@@ -18,6 +18,7 @@ class Card(Artifact):
         super().__init__(Card.display_name(rank, color))
         self.rank = rank
         self.color = color
+        self.was_moved_at_least_once = False
 
     @staticmethod
     def display_name(rank, color) -> str:

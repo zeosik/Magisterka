@@ -12,6 +12,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    initloggerconfiguration(args.debug)
+    if (args.debug):
+        initloggerconfiguration(logging.DEBUG)
+    else:
+        initloggerconfiguration(logging.INFO)
 
     simulatorengine.run(args.game_name, args.num_players, args.num_humans)
