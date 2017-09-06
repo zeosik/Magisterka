@@ -59,9 +59,6 @@ class SimulatorEngine():
         last_phase = None
         while not self.gamestate.is_current_phase_end_game_phase():
 
-            if self.analyze_game:
-                self.analyzer.run_analysis(self.gamestate)
-
             if last_phase is not self.gamestate.current_phase():
                 all_rules = self.gamestate.current_phase().rules
             else:
@@ -69,6 +66,9 @@ class SimulatorEngine():
             last_phase = self.gamestate.current_phase()
 
             rule_picker = RulePicker(all_rules)
+
+            if self.analyze_game:
+                self.analyzer.run_analysis(self.gamestate, rule_picker)
 
             if self.gamestate.is_current_player_table_player():
                 current_rule = self.table_turn(rule_picker)

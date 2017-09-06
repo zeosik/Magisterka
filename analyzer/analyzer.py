@@ -28,7 +28,3 @@ def run(game_name, num_players, num_simulations):
     analysis_aggregator.print_final_result()
 
     #Analizujemy gre dla konkretnej liczby graczy, czy sprawdzamy jak się zachowuje gdy graczy jest mniej i wiecej?
-
-    #CO ANALIZOWAĆ - POMYSŁY:
-    # - średnia ilość wszystkich ruchów w turze
-    # - średnia ilość dozwolonych ruchów w turze
