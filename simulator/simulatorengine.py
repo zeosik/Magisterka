@@ -13,10 +13,11 @@ from analyzer.singlegameanalyzer import SingleGameAnalyzer
 
 
 class SimulatorEngine():
-    def __init__(self, gamestate: GameState, num_humans, analyze_game):
+    def __init__(self, gamestate: GameState, num_humans, num_random_bots, analyze_game):
         self.log = logging.getLogger(self.__class__.__name__)
         self.gamestate = gamestate
         self.num_humans = num_humans
+        self.num_random_bots = num_random_bots
         self.analyze_game = analyze_game
         self.server = Server(self.gamestate.number_of_players())
         if self.analyze_game:
@@ -46,7 +47,10 @@ class SimulatorEngine():
             if index < self.num_humans:
                 client = HumanClient("player" + str(index))
             else:
-                client = BotClient("player" + str(index))
+                if index < self.num_humans + self.num_random_bots:
+                    client = BotClient("player" + str(index), True)
+                else:
+                    client = BotClient("player" + str(index), False)
             client_thread = threading.Thread(target=client.run)
             client_thread.start()
         self.server.accept_clients()
@@ -114,7 +118,7 @@ class SimulatorEngine():
                 raise Exception()
         return rule
 
-def run(game_name, num_players, num_humans, analyze_game = False):
+def run(game_name, num_players, num_humans, num_random_bots = 0, analyze_game = False):
     if game_name=="5_10_15":
         game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
     elif game_name=="5_10_15_one_phase":
@@ -126,6 +130,6 @@ def run(game_name, num_players, num_humans, analyze_game = False):
     else:
         raise Exception("game name not implemented")
     
-    engine = SimulatorEngine(game, num_humans, analyze_game)
+    engine = SimulatorEngine(game, num_humans, num_random_bots, analyze_game)
     engine.prepare_server_and_clients()
     return engine.run()

@@ -28,5 +28,5 @@ class PlayerPhaseCounter(Parameter):
             values.append(a.parameters[self.name].result())
         results = []
         results.append((self.name + " - srednia", numpy.average(values)))
-        results.append((self.name + " - wariancja", numpy.var(values)))
+        results.append((self.name + " - odchylenie standardowe", numpy.std(values)))
         return results

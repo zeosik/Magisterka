@@ -17,12 +17,12 @@ class AnalysisAggregator:
             for item in result: # może być kilka wyników z jednego parametru (np średnia i wariancja)
                 print("Wartosc dla parametru", item[0], ":", item[1])
 
-def run(game_name, num_players, num_simulations):
+def run(game_name, num_players, num_random_bots, num_simulations):
     analysis_aggregator = AnalysisAggregator()
 
     for n in range(num_simulations):
         print("Iteracja:", n + 1, "/", num_simulations)
-        analyzer = simulatorengine.run(game_name, num_players, 0, True)
+        analyzer = simulatorengine.run(game_name, num_players, 0, num_random_bots, True)
         analysis_aggregator.add_analyzer(analyzer)
 
     analysis_aggregator.print_final_result()
