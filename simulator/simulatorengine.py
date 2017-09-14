@@ -119,16 +119,16 @@ class SimulatorEngine():
         return rule
 
 def run(game_name, num_players, num_humans, num_random_bots = 0, analyze_game = False):
-    if game_name=="5_10_15":
-        game = simpleGameWithOnePlayerType(example_5_10_15(), num_players)
-    elif game_name=="5_10_15_one_phase":
-        game = simpleGameWithOnePlayerType(example_5_10_15(False), num_players)
-    elif game_name=="card_sequence":
-        game = simpleGameWithOnePlayerType(example_card_sequence(), num_players)
-    elif game_name=="remik":
-        game = simpleGameWithOnePlayerType(example_remik(), num_players)
-    else:
-        raise Exception("game name not implemented")
+    games = dict()
+    config_file = open("games_list.txt", "r")
+    for line in config_file.readlines():
+        games[line.split()[0]] = line.split()[1]
+    config_file.close()
+
+    try:
+        game = simpleGameWithOnePlayerType(eval(games[game_name]), num_players)
+    except:
+        raise Exception("game name not implemented or not listed in games_list.txt")
     
     engine = SimulatorEngine(game, num_humans, num_random_bots, analyze_game)
     engine.prepare_server_and_clients()

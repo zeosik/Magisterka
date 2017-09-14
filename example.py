@@ -169,13 +169,12 @@ def example_card_sequence():
     shuffle_deck.append_next(fill_middle_cards)
     check_if_shuffle_deck = If(less_then_8_cards_in_deck, move_discard_to_deck, fill_middle_cards)
     move_middle_to_discard.append_next(check_if_shuffle_deck)
-    to_move_duplciates = ChangePhase(move_duplicates_phase, TablePlayerChooser())
-    fill_middle_cards.append_next(to_move_duplciates)
+    fill_middle_cards.append_next(ChangePhase(win_check_phase, TablePlayerChooser()))
     refill_middle_phase.append_rule(If(full_middle, move_middle_to_discard, check_if_shuffle_deck))
 
     #move duplicates
     move_duplicates_phase.append_rule(Move(DuplicateRankCardPicker(PlacePicker(CurrentPlayerChooser(player_type), points), PlacePicker(TablePlayerChooser(), discard))))
-    move_duplicates_phase.rules[0].append_next(ChangePhase(win_check_phase, TablePlayerChooser()))
+    move_duplicates_phase.rules[0].append_next(ChangePhase(refill_middle_phase, TablePlayerChooser()))
 
     #win check
     to_choose_player = ChangePhase(choose_player_phase, TablePlayerChooser())
@@ -192,7 +191,7 @@ def example_card_sequence():
     #p_card_picker.add_condition(NumberOfMovedArtifacts(2))
     player_phase.append_rule(Move(p_card_picker))
     player_phase.append_rule(Pass())
-    end_turn = ChangePhase(refill_middle_phase, TablePlayerChooser())
+    end_turn = ChangePhase(move_duplicates_phase, TablePlayerChooser())
     player_phase.rules[0].append_next(end_turn)
     player_phase.rules[1].append_next(end_turn)
 

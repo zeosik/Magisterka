@@ -5,12 +5,10 @@ import numpy, itertools
 class NumberOfMovesCounter(Parameter):
     def __init__(self):
         super().__init__("NumberOfMovesCounter")
-        self.all_moves = []
-        self.legal_moves = []
+        self.moves = []
         
     def run(self, gamestate, rule_picker):
-        single_all_moves = 0
-        single_legal_moves = 0
+        single_moves = 0
         for rule in rule_picker.all_rules:
             if type(rule) is Move:  # tylko ruchy gdzie przekładamy karty
                 for player_input in rule.player_inputs():
@@ -20,22 +18,15 @@ class NumberOfMovesCounter(Parameter):
                         choices = player_input.all_choices(gamestate)
                         for length in range(len(choices) + 1):
                             for subset in itertools.combinations(choices, length):
-                                single_all_moves += 1
                                 if player_input.submit_choices(subset)[0]:
-                                    single_legal_moves += 1
-                        self.all_moves.append(single_all_moves)
-                        self.legal_moves.append(single_legal_moves)
+                                    single_moves += 1
+                        self.moves.append(single_moves)
 
     def result(self):
-        return (numpy.average(self.all_moves), numpy.average(self.legal_moves))
+        return numpy.average(self.moves)
 
     def aggregate(self, analyzers):
-        values_all, values_legal = [], []
+        values = []
         for a in analyzers:
-            result = a.parameters[self.name].result()
-            values_all.append(result[0])
-            values_legal.append(result[1])
-        results = []
-        results.append((self.name + "-wszystkie_srednia", numpy.average(values_all)))
-        results.append((self.name + "-legalne_srednia", numpy.average(values_legal)))
-        return results
+            values.append(a.parameters[self.name].result())
+        return [(self.name + "-srednia", numpy.average(values))]
