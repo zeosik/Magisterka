@@ -1,4 +1,5 @@
 from analyzer.parameters.parameter import Parameter
+import numpy
 
 class WinerFairnessChecker(Parameter):
     def __init__(self):
@@ -14,7 +15,6 @@ class WinerFairnessChecker(Parameter):
         return (self.winner_name, self.num_players)
 
     def aggregate(self, analyzers):
-        # TODO tu trzeba jakoś ładnie to wypisać (z uwzgdlędnieniem liczby graczy)
         winers = dict()
         for a in analyzers:
             single_result = a.parameters[self.name].result()
@@ -22,4 +22,12 @@ class WinerFairnessChecker(Parameter):
                 winers[single_result[0]] += 1
             else:
                 winers[single_result[0]] = 1
-        return [(self.name, str(winers))]
+
+        values = []
+        for name, value in winers.items():
+            values.append(value)
+        # jeżeli ktoś ani razu nie wygrał, nie bedzie go na liście, dorzucamy 0
+        while len(values) < self.num_players:
+            values.append(0)
+        
+        return [(self.name + "-odchylenie_standardowe", numpy.std(values))]

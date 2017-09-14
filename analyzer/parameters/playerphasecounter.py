@@ -27,6 +27,6 @@ class PlayerPhaseCounter(Parameter):
         for a in analyzers:
             values.append(a.parameters[self.name].result())
         results = []
-        results.append((self.name + " - srednia", numpy.average(values)))
-        results.append((self.name + " - odchylenie standardowe", numpy.std(values)))
+        results.append((self.name + "-srednia", numpy.average(values)))
+        results.append((self.name + "-odchylenie_standardowe", numpy.std(values)))
         return results

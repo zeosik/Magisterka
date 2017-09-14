@@ -1,0 +1,7 @@
+PlayerPhaseCounter-srednia 1
+PlayerPhaseCounter-odchylenie_standardowe 1
+WinerFairnessChecker-odchylenie_standardowe 1
+CardUsageChecker[%] 1
+GameLenghtCounter[s] 1
+NumberOfMovesCounter-wszystkie_srednia 1
+NumberOfMovesCounter-legalne_srednia 1

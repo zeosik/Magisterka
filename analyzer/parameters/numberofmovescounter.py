@@ -36,6 +36,6 @@ class NumberOfMovesCounter(Parameter):
             values_all.append(result[0])
             values_legal.append(result[1])
         results = []
-        results.append((self.name + " - wszystkie, srednia", numpy.average(values_all)))
-        results.append((self.name + " - legalne, srednia", numpy.average(values_legal)))
+        results.append((self.name + "-wszystkie_srednia", numpy.average(values_all)))
+        results.append((self.name + "-legalne_srednia", numpy.average(values_legal)))
         return results

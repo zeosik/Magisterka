@@ -37,6 +37,7 @@ from common.model.rules.shuffle import Shuffle
 def example_5_10_15(two_phase: bool = True) -> GameModel:
 
     game = GameModel('5-10-15')
+    game.time_per_move = 5
 
     #
     table_type = game.add_table_type(PlayerType('table-type'))
@@ -118,6 +119,7 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
 
 def example_card_sequence():
     game = GameModel('dwie pary')
+    game.time_per_move = 5
 
     table_type = game.add_table_type(PlayerType('table-type'))
     player_type = game.add_player_type(PlayerType('player-type'))
@@ -200,6 +202,7 @@ def example_card_sequence():
 def example_remik() -> GameModel:
     #TODO max players 3 na talie?
     game = GameModel('remik')
+    game.time_per_move = 10
 
     #typy
     table_type = game.add_table_type(PlayerType('table-type'))

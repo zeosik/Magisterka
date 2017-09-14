@@ -12,10 +12,23 @@ class AnalysisAggregator:
         print("Rezultat analizy:")
         print("Ilosc symulacji:", len(self.analyzers))
 
-        for p_name, parameter in self.analyzers[0].parameters.items():
+        weight_vector = dict()
+        config_file = open("analyzer/parameter_values.txt", "r")
+        for line in config_file.readlines():
+            weight_vector[line.split()[0]] = float(line.split()[1])
+        config_file.close()
+
+        overal_score = 0
+        for p_name, parameter in sorted(self.analyzers[0].parameters.items()):
             result = parameter.aggregate(self.analyzers)
             for item in result: # może być kilka wyników z jednego parametru (np średnia i wariancja)
                 print("Wartosc dla parametru", item[0], ":", item[1])
+                try:
+                    overal_score += item[1] * weight_vector[item[0]]
+                except (KeyError):
+                    print("ERROR: W pliku parameter_values.txt nie ma wagi dla parametru", item[0])
+                    return
+        print("Wynik ogolny: ", overal_score)
 
 def run(game_name, num_players, num_random_bots, num_simulations):
     analysis_aggregator = AnalysisAggregator()
