@@ -1,6 +1,7 @@
-CardUsageChecker[%] 0.1*x
-GameLenghtCounter[s] -1/240*x*x+x-30
-NumberOfMovesCounter-srednia -5*x*x+20*x-10
-PlayerPhaseCounter-srednia -0.5*x*x+7.5*x-15
-PlayerPhaseCounter-odchylenie_standardowe 15-x
-WinerFairnessChecker-odchylenie_standardowe 20-2*x
+#parametr waga_wiek_6 waga_wiek_8 waga_wiek_10
+CardUsageChecker[%] 0.1*x 0.1*x 0.1*x
+GameLenghtCounter[s] -1/240*x*x+x-30 -1/240*x*x+x-30 -1/240*x*x+x-30
+NumberOfMovesCounter-srednia -5*x*x+20*x-10 -5*x*x+20*x-10 -5*x*x+20*x-10
+PlayerPhaseCounter-srednia -0.5*x*x+7.5*x-15 -0.5*x*x+7.5*x-15 -0.5*x*x+7.5*x-15
+PlayerPhaseCounter-odchylenie_standardowe 15-x 15-x 15-x
+WinerFairnessChecker-odchylenie_standardowe 20-2*x 20-2*x 20-2*x

@@ -15,26 +15,35 @@ class AnalysisAggregator:
         weight_vector = dict()
         config_file = open("analyzer/parameter_values.txt", "r")
         for line in config_file.readlines():
-            weight_vector[line.split()[0]] = line.split()[1]
+            line_splited = line.split() 
+            weight_vector[line_splited[0]] = line_splited[1:]
         config_file.close()
 
-        overal_score = 0
+        overal_scores = [0, 0, 0]
         for p_name, parameter in sorted(self.analyzers[0].parameters.items()):
             result = parameter.aggregate(self.analyzers)
             for item in result: # może być kilka wyników z jednego parametru (np średnia i wariancja)
                 try:
                     x = item[1]
-                    score = max(eval(weight_vector[item[0]]), 0)
-                    overal_score += score
+                    scores = [0, 0, 0]
+                    for i in range(3):
+                        scores[i] = max(eval(weight_vector[item[0]][i]), 0)
+                        overal_scores[i] += scores[i]
                 except (KeyError):
                     print("ERROR: W pliku parameter_values.txt nie ma wagi dla parametru", item[0])
                     return
                 except:
                     print("ERROR: Sprawdz czy wagi w pliku parameter_values.txt sa dobrze zdefiniowane dla", item[0])
                     return
-                print("Wartosc dla parametru", item[0], ":", item[1], "punkty:", score)
-                
-        print("Wynik ogolny: ", overal_score)
+                print(item[0])
+                print("  wartosc:", item[1])
+                print("  punkty - 6 lat:", scores[0])
+                print("  punkty - 8 lat:", scores[1])
+                print("  punkty - 10 lat:", scores[2])
+        
+        print("Wynik ogolny - 6 lat: ", overal_scores[0])
+        print("Wynik ogolny - 8 lat: ", overal_scores[1])
+        print("Wynik ogolny - 10 lat: ", overal_scores[2])
 
 def run(game_name, num_players, num_random_bots, num_simulations):
     analysis_aggregator = AnalysisAggregator()
