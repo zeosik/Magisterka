@@ -16,6 +16,8 @@ class ForEachPlayer(Rule):
         self.current_player = None
         self.orginal_next = None
 
+        self.dummy_actions = self.create_actions(PlayerChooser('PlaceHolder ForEach PlayerChooser'))
+
     def apply(self, gamestate):
         #czy zaczynamy iteracje
         if self.player_iterator is None:
@@ -39,3 +41,8 @@ class ForEachPlayer(Rule):
         # TODO a co jak jest więcej niż 1?
         rule.append_next(self)
         return [rule]
+
+    def rules_dict(self):
+        ret = super().rules_dict()
+        ret['For'] = self.dummy_actions
+        return ret

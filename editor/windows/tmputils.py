@@ -1,8 +1,5 @@
 from common.model.phase import Phase
-from common.model.playerchooser.playerchooser import PlayerChooser
 from common.model.rules.changephase import ChangePhase
-from common.model.rules.foreachplayer import ForEachPlayer
-from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
 
 tmp = {}
@@ -55,22 +52,10 @@ class TMPUTILS:
 
     @staticmethod
     def append_rules(all: dict, rule):
-        for text, l in TMPUTILS.next_rules(rule).items():
+        for text, l in rule.rules_dict().items():
             for r in l:
                 if text not in all:
                     all[text] = []
                 if r not in all[text]:
                     all[text].append(r)
                     TMPUTILS.append_rules(all, r)
-
-    @staticmethod
-    #TODO taki cheat
-    def next_rules(rule) -> dict:
-        if issubclass(rule.__class__, If):
-            return { 'Yes': rule.if_true, 'No': rule.if_false }
-        elif issubclass(rule.__class__, ForEachPlayer):
-            if rule not in tmp:
-                tmp[rule] = rule.create_actions(PlayerChooser('PlaceHolderPlayerChooser'))
-            return { '': rule.next + tmp[rule] }
-        else:
-            return { '': rule.next }

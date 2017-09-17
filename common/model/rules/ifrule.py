@@ -30,3 +30,9 @@ class If(Rule):
 
     def append_next_if_false(self, rule):
         self.if_false.append(rule)
+
+    def rules_dict(self):
+        ret = super().rules_dict()
+        ret['Yes'] = self.if_true
+        ret['No'] = self.if_false
+        return ret

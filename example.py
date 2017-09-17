@@ -5,6 +5,8 @@ from common.model.cardpicker.allcardpicker import AllCardPicker
 from common.model.conditions.artifactsinplaceequal import ArtifactsInPlaceEqual
 from common.model.conditions.artifactsinplacelessthen import ArtifactsInPlaceLessThen
 from common.model.conditions.emptyplace import EmptyPlace
+from common.model.conditions.ifnot import IfNot
+from common.model.conditions.ifnumberofplayers import IfNumberOfPlayers
 from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
 from common.model.conditions.moveconditions.numberofmovedartifacts import NumberOfMovedArtifacts
 from common.model.conditions.newround import NewRound
@@ -90,7 +92,8 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     phase_choose_player.append_rule(If(EmptyPlace(PlacePicker(TablePlayerChooser(), deck)), reshuffle_deck_rule, to_player_turn))
 
     #faza - sprawdzenie wygranej
-    phase_win_check.append_rule(If(EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand)), ChangePhase(phase_end, TablePlayerChooser()) , ChangePhase(phase_choose_player, TablePlayerChooser())))
+    win_condition = IfNumberOfPlayers(1, player_type, lambda p: IfNot(EmptyPlace(PlacePicker(p, player_hand))))
+    phase_win_check.append_rule(If(win_condition, ChangePhase(phase_end, TablePlayerChooser()) , ChangePhase(phase_choose_player, TablePlayerChooser())))
  
     #faza - tura gracza
     source_place_picker = PlacePicker(CurrentPlayerChooser(player_type), player_hand)

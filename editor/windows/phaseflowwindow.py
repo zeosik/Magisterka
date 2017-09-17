@@ -48,17 +48,9 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
 
         start = Rule('start {0}'.format(phase.name))
         start.next = phase.rules
-        # phase.rules = [start]
+        phase.rules = [start]
 
-        rules = dict()
-        rules[''] = [start]
-        TMPUTILS.append_rules(rules, start)
-
-        rules_set = set()
-        for text, rule_list in rules.items():
-            for rule in rule_list:
-                rules_set.add(rule)
-
+        rules_set = phase.all_rules_set()
 
         graph = Graph()
         graph.vp.name = graph.new_vertex_property('string')
@@ -94,7 +86,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
 
         for rule in rules_set:
-            for next_text, next_rule_list in TMPUTILS.next_rules(rule).items():
+            for next_text, next_rule_list in rule.rules_dict().items():
                 for next_rule in next_rule_list:
                     edge = graph.add_edge(rule_vertex[rule], rule_vertex[next_rule])
                     graph.ep.text[edge] = next_text

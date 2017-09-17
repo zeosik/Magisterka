@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Dict
 
 from common.model.playerinput import PlayerInput
 from simulator.gamestate import GameState
+
 
 class Rule:
 
@@ -25,3 +26,6 @@ class Rule:
 
     def append_next(self, rule): #Rule
         self.next.append(rule)
+
+    def rules_dict(self) -> Dict[str, list]:
+        return { '': self.next }
