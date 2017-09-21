@@ -43,14 +43,21 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         self.log.debug('drawing phase flow {0}'.format(phase.name))
         TMPUTILS.clear_container(self.main_panel)
 
+        top = Gtk.HBox()
+
         name = Gtk.Label(phase.name)
-        self.main_panel.pack_start(name, False, False, 0)
+        top.pack_start(name, True, True, 0)
+        refresh_button = Gtk.Button('Refresh')
+        refresh_button.connect('clicked', lambda w: self.draw_for(phase, model))
+        top.pack_start(refresh_button, True, True, 0)
+        self.main_panel.pack_start(top, False, False, 0)
 
         start = Rule('start {0}'.format(phase.name))
         start.next = phase.rules
         phase.rules = [start]
 
         rules_set = phase.all_rules_set()
+        phase.rules = start.next
 
         graph = Graph()
         graph.vp.name = graph.new_vertex_property('string')
