@@ -279,3 +279,95 @@ def example_remik() -> GameModel:
 
 def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Place):
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
+
+
+def test() -> GameModel:
+    game = GameModel("5-10-15-test")
+
+    table = game.add_table_type(PlayerType('table'))
+    p1 = game.add_player_type(PlayerType('gracz 1'))
+    p2 = game.add_player_type(PlayerType('gracz 2'))
+
+    p1_picker = CurrentPlayerChooser(p1)
+    p2_picker = CurrentPlayerChooser(p2)
+
+    deck = table.add_place(FaceDownCardPile('Talia'))
+    deck_picker = PlacePicker(TablePlayerChooser(), deck)
+    discard = table.add_place(FaceUpCardPile('Środek'))
+    discard_picker = PlacePicker(TablePlayerChooser(), discard)
+
+    p1_hand = p1.add_place(PlayerCardLine('Ręka pierwszego gracza'))
+    p1_hand_picker = PlacePicker(p1_picker, p1_hand)
+    p2_hand = p2.add_place(PlayerCardLine('Ręka drugiego gracza'))
+    p2_hand_picker = PlacePicker(p2_picker, p2_hand)
+
+    p1_turn = p1.add_phase(Phase('tury gracza 1'))
+    p2_turn = p2.add_phase(Phase('tury gracza 2'))
+
+
+
+    start = table.add_phase(Phase('gry'))
+    end = table.add_phase(Phase('Koniec gry'))
+
+    shuffle = Shuffle(deck_picker)
+    shuffle.user_name_str = 'Potasuj talie'
+    give_5_card_to_p1 = give_n_cards(5, deck_picker, p1_hand)(p1_picker)
+    give_5_card_to_p1.user_name_str = 'Przełóż 5 kart z talia do ręka pierwszego gracza'
+    give_5_card_to_p2 = give_n_cards(5, deck_picker, p2_hand)(p2_picker)
+    give_5_card_to_p2.user_name_str = 'Przełóż 5 kart z talia do ręka drugiego gracza'
+
+    to_p1_turn = ChangePhase(p1_turn, p1_picker)
+    to_p1_turn.user_name_str = 'Tura gracza 1'
+    to_p2_turn = ChangePhase(p2_turn, p2_picker)
+    to_p2_turn.user_name_str = 'Tura gracza 2'
+    end_game = ChangePhase(end, TablePlayerChooser())
+    end_game.user_name_str = 'Koniec gry'
+
+    start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2, to_p1_turn]))
+    #start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2]))
+
+    p1_play_card = Move(CardPicker(p1_hand_picker, discard_picker))
+    p1_play_card.user_name_str = ' Zagraj karty'
+    p1_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
+    p1_take_card = Move(TopCardPicker(1, deck_picker, p1_hand_picker))
+    p1_take_card.user_name_str = 'Dobierz kartę'
+    p1_if = If(EmptyPlace(p1_hand_picker), end_game, to_p2_turn)
+    p1_if.user_name_str = 'Czy koniec gry'
+
+    shuffle2 = Move(AllCardPicker(discard_picker, deck_picker))
+    shuffle2.user_name_str = 'Przenieś środek do talia'
+    shuffle3 = Shuffle(deck_picker)
+    shuffle3.user_name_str = 'Potasuj talia'
+    sequence([shuffle2, shuffle3, p1_take_card, p1_if])
+    if_shuffle = If(EmptyPlace(deck_picker), shuffle2, p1_take_card)
+    if_shuffle.user_name_str = 'Czy talia jest pusta'
+
+    sequence([p1_play_card, p1_if])
+    #sequence([p1_take_card, p1_if])
+    p1_turn.append_rule(p1_play_card)
+    p1_turn.append_rule(if_shuffle)
+
+    p2_play_card = Move(CardPicker(p2_hand_picker, discard_picker))
+    p2_play_card.user_name_str = ' Zagraj karty'
+    p2_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
+    p2_take_card = Move(TopCardPicker(1, deck_picker, p2_hand_picker))
+    p2_take_card.user_name_str = 'Dobierz kartę'
+    p2_if = If(EmptyPlace(p2_hand_picker), end_game, to_p1_turn)
+    p2_if.user_name_str = 'Czy koniec gry'
+
+    sequence([p2_play_card, p2_if])
+    sequence([p2_take_card, p2_if])
+    p2_turn.append_rule(p2_play_card)
+    p2_turn.append_rule(p2_take_card)
+
+    game.start_phase = start
+    game.end_phase = end
+
+    return game
+
+def sequence(rules: list):
+    for i in range(1, len(rules)):
+        r1 = rules[i - 1]
+        r2 = rules[i]
+        r1.append_next(r2)
+    return rules[0]

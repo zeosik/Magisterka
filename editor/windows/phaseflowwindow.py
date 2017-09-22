@@ -52,7 +52,10 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         top.pack_start(refresh_button, True, True, 0)
         self.main_panel.pack_start(top, False, False, 0)
 
-        start = Rule('start {0}'.format(phase.name))
+        #TMPUTILS.start_rule_color = TMPUTILS.rule_color
+        #start = phase.rules[0]
+        #start = Rule('Początek {0}'.format(phase.name))
+        start = Rule('{0}'.format(phase.name))
         start.next = phase.rules
         phase.rules = [start]
 
@@ -78,7 +81,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             vertex = graph.add_vertex()
             rule_vertex[rule] = vertex
             self.vertex_rule[vertex] = rule
-            graph.vp.name[vertex] = rule.simple_name()
+            graph.vp.name[vertex] = rule.verticle_name()
             graph.vp.fullname[vertex] = rule.name
             if rule is start:
                 color = TMPUTILS.start_rule_color()
@@ -92,11 +95,19 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             graph.vp.text_pos[vertex] = 0
             graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
 
+            #TODO remove
+            graph.vp.color[vertex] = TMPUTILS.rule_color()
+            graph.vp.shape[vertex] = 'circle'
+            graph.vp.text_rotation[vertex] = 0
+            graph.vp.rotation[vertex] = 0
+
         for rule in rules_set:
             for next_text, next_rule_list in rule.rules_dict().items():
                 for next_rule in next_rule_list:
                     edge = graph.add_edge(rule_vertex[rule], rule_vertex[next_rule])
-                    graph.ep.text[edge] = next_text
+
+                    as_polish = {'No': "Nie", 'Yes': "Tak"}
+                    graph.ep.text[edge] = as_polish[next_text] if next_text in as_polish else next_text
                     graph.ep.text_color[edge] = TMPUTILS.text_color(next_text)
 
         pos = sfdp_layout(graph)

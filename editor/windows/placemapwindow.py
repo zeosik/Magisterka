@@ -38,6 +38,10 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
         self.log.debug('drawing place map for model {0}'.format(model.name))
         TMPUTILS.clear_container(self.main_panel)
 
+        refresh_button = Gtk.Button('Refresh')
+        refresh_button.connect('clicked', lambda w: self.draw_for(sender, model))
+        self.main_panel.pack_start(refresh_button, False, False, 0)
+
         all_places = set()
         for player_type in model.player_types + [model.table_type]:
             for place in player_type.places:
@@ -51,6 +55,7 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
         graph.vp.text_pos = graph.new_vertex_property('float')
         graph.ep.color = graph.new_edge_property('vector<float>')
 
+
         for place in all_places:
             vertex = graph.add_vertex()
             place_vertex[place] = vertex
@@ -58,6 +63,9 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
             graph.vp.name[vertex] = place.name
             graph.vp.color[vertex] = TMPUTILS.table_color() if place in model.table_type.places else TMPUTILS.player_color()
             graph.vp.text_pos[vertex] = 0
+
+            # TODO remove
+            graph.vp.color[vertex] = TMPUTILS.table_color()
 
         self.graph = graph
         self.place_vertex = place_vertex
@@ -122,6 +130,8 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
                 source = rule.card_picker.source_place_picker.place
                 target = rule.card_picker.target_place_picker.place
                 ret.append((source, target, rule))
+        #TODO remove
+        ret = []
         return ret
 
 
