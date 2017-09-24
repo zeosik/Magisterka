@@ -90,8 +90,8 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
         to_player_turn_phase2 = ChangePhase(phase2_draw, next_player_chooser2)
         #to_player_turn_phase1 = If(EmptyPlace(PlacePicker(next_player_chooser, player_hand)), skip_next, to_player_turn_phase1_cp)
         #to_player_turn_phase2 = If(EmptyPlace(PlacePicker(next_player_chooser, player_hand)), skip_next, to_player_turn_phase2_cp)
-        to_player_turn_when_phase1 = If(NewRound(player_type), to_player_turn_phase2, to_player_turn_phase1)
-        to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
+        to_player_turn_when_phase1 = If(NewRound(player_type, con), to_player_turn_phase2, to_player_turn_phase1)
+        to_player_turn_when_phase2 = If(NewRound(player_type, con), to_player_turn_phase1, to_player_turn_phase2)
         to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
     else:
         to_player_turn = ChangePhase(phase1, next_player_chooser2)

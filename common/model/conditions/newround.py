@@ -8,10 +8,10 @@ from simulator.gamestate import GameState
 
 class NewRound(IfCondition):
 
-    def __init__(self, player_type: PlayerType):
+    def __init__(self, player_type: PlayerType, condition = None):
         super().__init__('New Round')
         self.player_type = player_type
-        self.last_player_chooser = LastPlayerChooser(self.player_type)
+        self.last_player_chooser = LastPlayerChooser(self.player_type, condition)
 
     def evaluate(self, gamestate: GameState):
         #TODO to samo co w emptyplace, pozniej pomysle
