@@ -77,6 +77,11 @@ class GameState:
         self.player_current_phase[self.current_player()] = phase
         self.log.debug(" -Przechodze do fazy: " + phase.name)
 
+        for p in self.players_for_type(self.current_type):
+            ph = self.current_phase_for_player(p)
+            ph_str = "none" if ph is None else ph.name
+            self.log.debug('pl: {0} ->: {1}'.format(p.name, ph_str))
+
     def switch_player(self, player: Player, phase: Phase):
         self.current_type = self.model.get_player_type_for_phase(phase)
         if player not in self.type_players_dict[self.current_type]:
