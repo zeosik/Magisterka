@@ -301,13 +301,14 @@ def test() -> GameModel:
     p2_hand = p2.add_place(PlayerCardLine('Ręka drugiego gracza'))
     p2_hand_picker = PlacePicker(p2_picker, p2_hand)
 
-    p1_turn = p1.add_phase(Phase('tury gracza 1'))
-    p2_turn = p2.add_phase(Phase('tury gracza 2'))
+    p1_turn = p1.add_phase(Phase('Tura gracza 1'))
+    p2_turn = p2.add_phase(Phase('Tura gracza 2'))
 
 
 
     start = table.add_phase(Phase('gry'))
     end = table.add_phase(Phase('Koniec gry'))
+    table_turn = table.add_phase(Phase('Tura stołu'))
 
     shuffle = Shuffle(deck_picker)
     shuffle.user_name_str = 'Potasuj talie'
@@ -317,51 +318,69 @@ def test() -> GameModel:
     give_5_card_to_p2.user_name_str = 'Przełóż 5 kart z talia do ręka drugiego gracza'
 
     to_p1_turn = ChangePhase(p1_turn, p1_picker)
-    to_p1_turn.user_name_str = 'Tura gracza 1'
+    to_p1_turn.user_name_str = 'Tura pierwszego gracza'
     to_p2_turn = ChangePhase(p2_turn, p2_picker)
     to_p2_turn.user_name_str = 'Tura gracza 2'
     end_game = ChangePhase(end, TablePlayerChooser())
     end_game.user_name_str = 'Koniec gry'
 
-    start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2, to_p1_turn]))
-    #start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2]))
+    give_cards = ForEachPlayer(p1, give_n_cards(5, deck_picker, p1_hand))
+    give_cards.user_name_str = 'Dla każdego gracza'
+    give_cards.dummy_actions[0].user_name_str = 'Przenieś 5 kart z talia do ręka gracza'
+
+    #start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2, to_p1_turn]))
+    start.append_rule(sequence([shuffle, give_cards, to_p1_turn]))
 
     p1_play_card = Move(CardPicker(p1_hand_picker, discard_picker))
     p1_play_card.user_name_str = ' Zagraj karty'
     p1_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
     p1_take_card = Move(TopCardPicker(1, deck_picker, p1_hand_picker))
     p1_take_card.user_name_str = 'Dobierz kartę'
-    p1_if = If(EmptyPlace(p1_hand_picker), end_game, to_p2_turn)
-    p1_if.user_name_str = 'Czy koniec gry'
+    #p1_if = If(EmptyPlace(p1_hand_picker), end_game, to_p2_turn)
+    #p1_if.user_name_str = 'Czy koniec gry'
+    to_table_turn = ChangePhase(table_turn, TablePlayerChooser())
+    to_table_turn.user_name_str = 'Koniec tury'
 
-    shuffle2 = Move(AllCardPicker(discard_picker, deck_picker))
-    shuffle2.user_name_str = 'Przenieś środek do talia'
-    shuffle3 = Shuffle(deck_picker)
-    shuffle3.user_name_str = 'Potasuj talia'
-    sequence([shuffle2, shuffle3, p1_take_card, p1_if])
-    if_shuffle = If(EmptyPlace(deck_picker), shuffle2, p1_take_card)
-    if_shuffle.user_name_str = 'Czy talia jest pusta'
-
-    sequence([p1_play_card, p1_if])
-    #sequence([p1_take_card, p1_if])
+    sequence([p1_play_card, to_table_turn])
+    sequence([p1_take_card, to_table_turn])
     p1_turn.append_rule(p1_play_card)
-    p1_turn.append_rule(if_shuffle)
+    p1_turn.append_rule(p1_take_card)
 
     p2_play_card = Move(CardPicker(p2_hand_picker, discard_picker))
     p2_play_card.user_name_str = ' Zagraj karty'
     p2_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
     p2_take_card = Move(TopCardPicker(1, deck_picker, p2_hand_picker))
     p2_take_card.user_name_str = 'Dobierz kartę'
-    p2_if = If(EmptyPlace(p2_hand_picker), end_game, to_p1_turn)
+    p2_if = If(EmptyPlace(p2_hand_picker), end_game, to_table_turn)
     p2_if.user_name_str = 'Czy koniec gry'
 
-    sequence([p2_play_card, p2_if])
-    sequence([p2_take_card, p2_if])
+    sequence([p2_play_card, to_table_turn])
+    sequence([p2_take_card, to_table_turn])
     p2_turn.append_rule(p2_play_card)
     p2_turn.append_rule(p2_take_card)
 
     game.start_phase = start
     game.end_phase = end
+
+
+    #p1_win_check = If(EmptyPlace(p1_hand_picker), end_game, to_p1_turn)
+    #p1_win_check.user_name_str = "Czy ręka pierwszego gracza jest pusta"
+    #p2_win_check = If(EmptyPlace(p2_hand_picker), end_game, to_p2_turn)
+    #p2_win_check.user_name_str = "Czy ręka drugiego gracza jest pusta"
+    #if_win_check = If(NewRound(p1), p1_win_check, p2_win_check)
+    #if_win_check.user_name_str = 'Czy ostatnio był gracz 2'
+    if_win_check = If(EmptyPlace(p1_hand_picker), end_game, to_p2_turn)
+    if_win_check.user_name_str = "Czy ręka obecnego gracza jest pusta"
+    to_p2_turn.user_name_str = "Tura następnego gracza"
+    shuffle2 = Move(AllCardPicker(discard_picker, deck_picker))
+    shuffle2.user_name_str = 'Przenieś środek do talia'
+    shuffle3 = Shuffle(deck_picker)
+    shuffle3.user_name_str = 'Potasuj talia'
+    sequence([shuffle2, shuffle3, if_win_check])
+    if_shuffle = If(EmptyPlace(deck_picker), shuffle2, if_win_check)
+    if_shuffle.user_name_str = 'Czy talia jest pusta'
+
+    table_turn.append_rule(if_shuffle)
 
     return game
 

@@ -107,6 +107,9 @@ class ViewModelWindow(Gtk.ApplicationWindow):
             graph.vp.text_pos[vertex] = 0
             graph.vp.text_off[vertex] = [0, 0]
 
+            #TODO remove
+            graph.vp.color[vertex] = TMPUTILS.table_color()
+
         for phase in all_phases:
             for other in phase_phase[phase]:
                 graph.add_edge(phase_vertex[phase], phase_vertex[other])

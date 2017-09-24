@@ -55,7 +55,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         #TMPUTILS.start_rule_color = TMPUTILS.rule_color
         #start = phase.rules[0]
         #start = Rule('Początek {0}'.format(phase.name))
-        start = Rule('{0}'.format(phase.name))
+        start = Rule('Początek {0}'.format(phase.name))
         start.next = phase.rules
         phase.rules = [start]
 

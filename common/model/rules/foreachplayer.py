@@ -44,5 +44,7 @@ class ForEachPlayer(Rule):
 
     def rules_dict(self):
         ret = super().rules_dict()
-        ret['For'] = self.dummy_actions
+        #ret['For'] = self.dummy_actions
+        #TODO remove
+        ret[' '] = self.dummy_actions
         return ret
