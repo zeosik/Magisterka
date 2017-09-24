@@ -11,5 +11,8 @@ class SkipPlayerTurn(Rule):
         self.register_input(self.player_chooser)
 
     def apply(self, gamestate: GameState):
+        current_player = gamestate.current_player()
+        current_phase = gamestate.current_phase()
         player = self.player_chooser.submitted()
         gamestate.switch_player(player, gamestate.current_phase_for_player(player))
+        gamestate.switch_player(current_player, current_phase)

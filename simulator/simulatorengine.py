@@ -2,6 +2,7 @@ import logging, itertools, threading
 
 from common.model.player import Player
 from common.model.playerinput import PlayerInput
+from common.model.rules.changephase import ChangePhase
 from common.model.rules.rule import Rule
 from common.model.rules.rulepicker import RulePicker
 from simulator.network.server import Server
@@ -61,9 +62,12 @@ class SimulatorEngine():
         self.log.debug("-Przechodze do fazy: " + self.gamestate.current_phase().name)
 
         last_phase = None
+        last_rule_was_change_phase = True
         while not self.gamestate.is_current_phase_end_game_phase():
 
-            if last_phase is not self.gamestate.current_phase():
+            if last_rule_was_change_phase:
+            #if last_phase is None or issubclass(last_phase.__class__, ChangePhase):
+            #if last_phase is not self.gamestate.current_phase():
                 all_rules = self.gamestate.current_phase().rules
             else:
                 all_rules = current_rule.next
@@ -95,6 +99,7 @@ class SimulatorEngine():
                                 real_choice.append(artifact_real)
                     player_inputs[index].submit_choices(real_choice)
             current_rule.apply(self.gamestate)
+            last_rule_was_change_phase = issubclass(current_rule.__class__, ChangePhase)
 
         self.server.close_connections()
         self.log.debug("Koncze symulacje")
