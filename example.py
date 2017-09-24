@@ -34,6 +34,7 @@ from common.model.rules.ifrule import If
 from common.model.rules.move import Move
 from common.model.rules.preparenewplaceinplacegroup import PrepareNewPlaceInPlaceGroup
 from common.model.rules.shuffle import Shuffle
+from common.model.rules.skipplayerturn import SkipPlayerTurn
 
 
 def example_5_10_15(two_phase: bool = True) -> GameModel:
@@ -76,15 +77,21 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     phase_start.rules[0].append_next(ForEachPlayer(player_type, give_5_cards))
     phase_start.rules[0].next[0].append_next(ChangePhase(phase1, FirstPlayerChooser(player_type)))
 
+    next_player_chooser = NextPlayerChooser(CurrentPlayerChooser(player_type))
+    skip_next = SkipPlayerTurn(next_player_chooser)
+    skip_next.append_next(ChangePhase(phase_choose_player, TablePlayerChooser()))
     #faza - wybor gracza
     if two_phase:
-        to_player_turn_phase1 = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
-        to_player_turn_phase2 = ChangePhase(phase2_draw, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_phase1_cp = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_phase2_cp = ChangePhase(phase2_draw, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_phase1 = If(EmptyPlace(PlacePicker(next_player_chooser, player_hand)), skip_next, to_player_turn_phase1_cp)
+        to_player_turn_phase2 = If(EmptyPlace(PlacePicker(next_player_chooser, player_hand)), skip_next, to_player_turn_phase2_cp)
         to_player_turn_when_phase1 = If(NewRound(player_type), to_player_turn_phase2, to_player_turn_phase1)
         to_player_turn_when_phase2 = If(NewRound(player_type), to_player_turn_phase1, to_player_turn_phase2)
         to_player_turn = If(IsCurrentPlayerInPhase(phase1, player_type), to_player_turn_when_phase1, to_player_turn_when_phase2)
     else:
-        to_player_turn = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn_cp = ChangePhase(phase1, NextPlayerChooser(CurrentPlayerChooser(player_type)))
+        to_player_turn = If(EmptyPlace(PlacePicker(next_player_chooser, player_hand)), skip_next, to_player_turn_cp)
 
     reshuffle_deck_rule = Move(AllCardPicker(PlacePicker(TablePlayerChooser(), discard_pile), PlacePicker(TablePlayerChooser(), deck)))
     reshuffle_deck_rule.append_next(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
