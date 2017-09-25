@@ -139,18 +139,18 @@ def example_card_sequence():
     cards = CardGenerator.cards(1, 10, list(CardColor))
 
     #miejsca
-    middle = table_type.add_place(FaceUpCardLine('middle'))
-    deck = table_type.add_place(FaceDownCardPile('deck', cards))
-    discard = table_type.add_place(FaceDownCardPile('discard'))
-    points = player_type.add_place(FaceDownCardPile('points'))
+    middle = table_type.add_place(FaceUpCardLine('środek'))
+    deck = table_type.add_place(FaceDownCardPile('talia', cards))
+    discard = table_type.add_place(FaceDownCardPile('odrzucone'))
+    points = player_type.add_place(FaceDownCardPile('zdobyte'))
 
     #fazy stolu
-    start_phase = table_type.add_phase(Phase('start'))
-    refill_middle_phase = table_type.add_phase(Phase('refill-middle'))
-    move_duplicates_phase = table_type.add_phase(Phase('move duplicates'))
-    win_check_phase = table_type.add_phase(Phase('check victory'))
-    choose_player_phase = table_type.add_phase(Phase('choose-player'))
-    end_phase = table_type.add_phase(Phase('end'))
+    start_phase = table_type.add_phase(Phase('przygotowania rozgrywki'))
+    refill_middle_phase = table_type.add_phase(Phase('uzupełnienia środka'))
+    move_duplicates_phase = table_type.add_phase(Phase('odrzucenia dupliaktów'))
+    win_check_phase = table_type.add_phase(Phase('sprawdzenia wygranej'))
+    choose_player_phase = table_type.add_phase(Phase('wybóru następnego gracza'))
+    end_phase = table_type.add_phase(Phase('koniec gry'))
 
     game.start_phase = start_phase
     game.end_phase = end_phase
@@ -161,13 +161,18 @@ def example_card_sequence():
     discard_picker = PlacePicker(TablePlayerChooser(), discard)
 
     #fazy graczy
-    player_phase = player_type.add_phase(Phase('player-phase'))
+    player_phase = player_type.add_phase(Phase('tury gracza'))
 
     #start_phase
-    start_phase.append_rule(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
+    sp_shuffle = Shuffle(PlacePicker(TablePlayerChooser(), deck))
+    sp_shuffle.user_name_str = "potasuj talie"
+    start_phase.append_rule(sp_shuffle)
     fill_middle_to_8_cards = Move(TopCardFillPicker(8, PlacePicker(TablePlayerChooser(), deck), PlacePicker(TablePlayerChooser(), middle)))
+    fill_middle_to_8_cards.user_name_str = 'Uzupełnij karty na środku'
     start_phase.rules[0].append_next(fill_middle_to_8_cards)
-    start_phase.rules[0].next[0].append_next(ChangePhase(player_phase, FirstPlayerChooser(player_type)))
+    sp_end_turn = ChangePhase(player_phase, FirstPlayerChooser(player_type))
+    sp_end_turn.user_name_str = 'tura pierwszego gracza'
+    start_phase.rules[0].next[0].append_next(sp_end_turn)
 
     #refill middle
     full_middle = ArtifactsInPlaceEqual(8, PlacePicker(TablePlayerChooser(), middle))
@@ -175,34 +180,52 @@ def example_card_sequence():
     less_then_8_cards_in_deck = ArtifactsInPlaceLessThen(8, PlacePicker(TablePlayerChooser(), deck))
     move_discard_to_deck = Move(AllCardPicker(discard_picker, deck_picker))
     shuffle_deck = Shuffle(deck_picker)
+    shuffle_deck.user_name_str = "potasuj talie"
     move_discard_to_deck.append_next(shuffle_deck)
+    move_discard_to_deck.user_name_str = "przenieś odrzucone do talia"
     fill_middle_cards = Move(TopCardFillPicker(8, deck_picker, middle_picker))
+    fill_middle_cards.user_name_str = "Przenieś 8 kart na środek"
     shuffle_deck.append_next(fill_middle_cards)
     check_if_shuffle_deck = If(less_then_8_cards_in_deck, move_discard_to_deck, fill_middle_cards)
+    check_if_shuffle_deck.user_name_str = "czy w talii jest mniej niż 8 kart"
     move_middle_to_discard.append_next(check_if_shuffle_deck)
-    fill_middle_cards.append_next(ChangePhase(win_check_phase, TablePlayerChooser()))
+    move_middle_to_discard.user_name_str = 'odrzuć karty ze środka'
+    fill_middle_cards.append_next(ChangePhase(choose_player_phase, TablePlayerChooser()))
+    fill_middle_cards.next[0].user_name_str = "wybór następnego gracza"
     refill_middle_phase.append_rule(If(full_middle, move_middle_to_discard, check_if_shuffle_deck))
+    refill_middle_phase.rules[0].user_name_str = 'czy na środku jest 8 kart'
 
     #move duplicates
     move_duplicates_phase.append_rule(Move(DuplicateRankCardPicker(PlacePicker(CurrentPlayerChooser(player_type), points), PlacePicker(TablePlayerChooser(), discard))))
-    move_duplicates_phase.rules[0].append_next(ChangePhase(refill_middle_phase, TablePlayerChooser()))
+    move_duplicates_phase.rules[0].user_name_str = "Przenieś duplikaty"
+    move_duplicates_phase.rules[0].append_next(ChangePhase(win_check_phase, TablePlayerChooser()))
+    move_duplicates_phase.rules[0].next[0].user_name_str = 'Sprawdzanie wygranej'
 
     #win check
-    to_choose_player = ChangePhase(choose_player_phase, TablePlayerChooser())
+    to_choose_player = ChangePhase(refill_middle_phase, TablePlayerChooser())
+    to_choose_player.user_name_str = "uzupełnij środek"
     to_end_game = ChangePhase(end_phase, TablePlayerChooser())
+    to_end_game.user_name_str = 'koniec gry'
     has_10_cards = ArtifactsInPlaceEqual(10, PlacePicker(CurrentPlayerChooser(player_type), points))
     win_check_phase.append_rule(If(has_10_cards, to_end_game, to_choose_player))
+    win_check_phase.rules[0].user_name_str = "Czy obecny gracz ma 10 kart"
 
     #choose player
     choose_player_phase.append_rule(ChangePhase(player_phase, NextPlayerChooser(CurrentPlayerChooser(player_type))))
+    choose_player_phase.rules[0].user_name_str = "tura następnego gracza"
 
     #player_phase
     p_card_picker = CardPicker(PlacePicker(TablePlayerChooser(), middle), PlacePicker(CurrentPlayerChooser(player_type), points))
     p_card_picker.add_condition(CardsSumsTo([10]))
     #p_card_picker.add_condition(NumberOfMovedArtifacts(2))
-    player_phase.append_rule(Move(p_card_picker))
-    player_phase.append_rule(Pass())
+    pp_move = Move(p_card_picker)
+    pp_move.user_name_str = 'dobierz karty'
+    player_phase.append_rule(pp_move)
+    pp_pass = Pass()
+    pp_pass.user_name_str = "spasuj"
+    player_phase.append_rule(pp_pass)
     end_turn = ChangePhase(move_duplicates_phase, TablePlayerChooser())
+    end_turn.user_name_str = "koniec tury"
     player_phase.rules[0].append_next(end_turn)
     player_phase.rules[1].append_next(end_turn)
 
