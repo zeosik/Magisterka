@@ -9,6 +9,8 @@ from common.model.conditions.ifnot import IfNot
 from common.model.conditions.ifnumberofplayers import IfNumberOfPlayers
 from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
 from common.model.conditions.moveconditions.numberofmovedartifacts import NumberOfMovedArtifacts
+from common.model.conditions.moveconditions.samecolorastarget import SameColorAsTarget
+from common.model.conditions.moveconditions.samerankastarget import SameRankAsTarget
 from common.model.conditions.newround import NewRound
 from common.model.placepicker.lastgroupplacepicker import LastGroupPlacePicker
 from common.model.places.place import Place
@@ -287,6 +289,75 @@ def example_remik() -> GameModel:
 
     return game
 
+def example_uno() -> GameModel:
+	
+    game = GameModel('uno')
+    game.time_per_move = 5
+
+    #
+    table_type = game.add_table_type(PlayerType('table-type'))
+    player_type = game.add_player_type(PlayerType('players'))
+    player_type.min_players = 2
+    player_type.max_players = 10
+
+    # rekwizyty
+    cards = CardGenerator.cards(min_rank=0, max_rank=9, colors=list(CardColor))
+
+    #miejsca
+    player_hand = player_type.add_place(PlayerCardLine('hand'))
+    deck = table_type.add_place(FaceDownCardPile('deck', starting_artifacts=cards))
+    middle = table_type.add_place(FaceUpCardPile('middle'))
+
+    #fazy
+    phase_start = table_type.add_phase(Phase('start'))
+    game.start_phase = phase_start
+    phase_end = table_type.add_phase(Phase('end'))
+    game.end_phase = phase_end
+    phase_choose_player = table_type.add_phase(Phase('choose-player'))
+    phase_win_check = table_type.add_phase(Phase('win-check'))
+    player_phase = player_type.add_phase(Phase('player_phase'))
+
+	#phase_start
+    phase_start.append_rule(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
+    give_5_cards = lambda playerChooser: Move(TopCardPicker(7, PlacePicker(TablePlayerChooser(), deck), PlacePicker(playerChooser, player_hand)))
+    phase_start.rules[0].append_next(ForEachPlayer(player_type, give_5_cards))
+    phase_start.rules[0].next[0].append_next(Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(TablePlayerChooser(), middle))))
+    phase_start.rules[0].next[0].next[0].append_next(ChangePhase(player_phase, FirstPlayerChooser(player_type)))
+	
+	#player_phase
+    playerChooser = CurrentPlayerChooser(player_type)
+    odrzucanie1 = CardPicker(PlacePicker(playerChooser, player_hand), PlacePicker(TablePlayerChooser(), middle))
+    odrzucanie1.add_condition(NumberOfMovedArtifacts(1))
+    odrzucanie1.add_condition(SameRankAsTarget())
+    player_phase.append_rule(Move(odrzucanie1))
+    odrzucanie2 = CardPicker(PlacePicker(playerChooser, player_hand), PlacePicker(TablePlayerChooser(), middle))
+    odrzucanie2.add_condition(NumberOfMovedArtifacts(1))
+    odrzucanie2.add_condition(SameColorAsTarget())
+    player_phase.append_rule(Move(odrzucanie2))
+    dobieranie = TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(playerChooser, player_hand))
+    player_phase.append_rule(Move(dobieranie))
+    end_player_phase = ChangePhase(phase_win_check, TablePlayerChooser())
+    player_phase.rules[0].append_next(end_player_phase)
+    player_phase.rules[1].append_next(end_player_phase)
+    player_phase.rules[2].append_next(end_player_phase)
+    
+	#phase_win_check
+    hand_empty = EmptyPlace(PlacePicker(CurrentPlayerChooser(player_type), player_hand))
+    to_choose_player = ChangePhase(phase_choose_player, TablePlayerChooser())
+	
+    # przenisimy wrzystkie karty do deck'a, ale 1 musimy zostawić
+    refill_deck = Move(AllCardPicker(PlacePicker(TablePlayerChooser(), middle), PlacePicker(TablePlayerChooser(), deck)))
+    refill_deck.append_next(Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(TablePlayerChooser(), middle))))
+    refill_deck.next[0].append_next(Shuffle(PlacePicker(TablePlayerChooser(), deck)))
+    refill_deck.next[0].next[0].append_next(to_choose_player)
+	
+    deck_empty = If(EmptyPlace(PlacePicker(TablePlayerChooser(), deck)), refill_deck, to_choose_player)
+    phase_win_check.append_rule(If(hand_empty, ChangePhase(phase_end, TablePlayerChooser()), deck_empty))
+	
+	#phase_choose_player
+    phase_choose_player.append_rule(ChangePhase(player_phase, NextPlayerChooser(CurrentPlayerChooser(player_type))))
+	
+    return game
 
 def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Place):
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))

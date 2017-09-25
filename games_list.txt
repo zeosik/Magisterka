@@ -3,3 +3,4 @@
 5_10_15_one_phase example_5_10_15(False)
 card_sequence example_card_sequence()
 remik example_remik()
+uno example_uno()

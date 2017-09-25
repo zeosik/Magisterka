@@ -8,7 +8,7 @@ from common.model.rules.rulepicker import RulePicker
 from simulator.network.server import Server
 from simulator.network.botclient import BotClient
 from simulator.network.humanclient import HumanClient
-from example import example_5_10_15, example_card_sequence, example_remik
+from example import *
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 from analyzer.singlegameanalyzer import SingleGameAnalyzer
 
