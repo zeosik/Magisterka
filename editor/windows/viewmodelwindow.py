@@ -7,7 +7,7 @@ from graph_tool.draw import sfdp_layout, GraphWidget
 from common.model.gamemodel import GameModel
 from common.model.playertype import PlayerType
 from editor.mediator import Mediator
-from editor.windows.tmputils import TMPUTILS
+from editor.windows.tmputils import TMPUTILS, EditorConfig
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -17,6 +17,7 @@ class ViewModelWindow(Gtk.ApplicationWindow):
     def __init__(self, app, show_start_window, mediator: Mediator):
         super().__init__(title='Game Flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
+        self.config = EditorConfig()
         #self.set_position(Gtk.WindowPosition.CENTER)
         self.set_size_request(800, 400)
         self.move(0, 500)
@@ -98,17 +99,17 @@ class ViewModelWindow(Gtk.ApplicationWindow):
             text = phase.name
             graph.vp.name[vertex] = text
             if phase is model.start_phase:
-                color = TMPUTILS.start_rule_color()
+                color = self.config.start_game_color()
+            elif phase is model.end_phase:
+                color = self.config.end_game_color()
             elif phase in model.table_type.phases:
-                color = TMPUTILS.table_color()
+                color = self.config.table_color()
             else:
-                color = TMPUTILS.player_color()
+                number = model.player_types.index(model.get_player_type_for_phase(phase))
+                color = self.config.player_color(number)
             graph.vp.color[vertex] = color
             graph.vp.text_pos[vertex] = 0
             graph.vp.text_off[vertex] = [0, 0]
-
-            #TODO remove
-            graph.vp.color[vertex] = TMPUTILS.table_color()
 
         for phase in all_phases:
             for other in phase_phase[phase]:

@@ -17,6 +17,9 @@ class CardPicker(PlayerInput):
         self.append_required_inputs(self.source_place_picker)
         self.append_required_inputs(self.target_place_picker)
 
+    def simple_name(self) -> str:
+        return "P"
+
     def add_condition(self, condition: MoveCondition):
         self.conditions.append(condition)
 

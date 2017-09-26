@@ -11,6 +11,9 @@ class TopCardPicker(CardPicker):
         self.log = logging.getLogger(self.__class__.__name__)
         self.card_count = card_count
 
+    def simple_name(self):
+        return "T({0})".format(self.card_count)
+
     def auto_submitted_values(self, gamestate: GameState) -> list:
         place = self.source_place_picker.submitted()
         # TODO przemyśleć czy kolejność ma tutaj znaczenie? (czy dobieramy na raz, czy po jednej?)

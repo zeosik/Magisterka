@@ -10,7 +10,7 @@ from gi.repository import Gtk
 
 from common.model.gamemodel import GameModel
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
-from example import example_5_10_15, example_card_sequence, example_remik, test
+from example import *
 
 
 class StartWindow(Gtk.ApplicationWindow):

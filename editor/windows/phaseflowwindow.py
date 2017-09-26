@@ -12,7 +12,7 @@ from common.model.rules.changephase import ChangePhase
 from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
 from editor.mediator import Mediator
-from editor.windows.tmputils import TMPUTILS
+from editor.windows.tmputils import TMPUTILS, EditorConfig
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -22,6 +22,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
     def __init__(self, app, mediator: Mediator):
         super().__init__(title='Phase flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
+        self.config = EditorConfig()
         self.set_size_request(600, 400)
         self.move(0, 0)
         self.main_panel = Gtk.VBox()
@@ -55,7 +56,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         #TMPUTILS.start_rule_color = TMPUTILS.rule_color
         #start = phase.rules[0]
         #start = Rule('Początek {0}'.format(phase.name))
-        start = Rule('Początek {0}'.format(phase.name))
+        start = Rule('Start {0}'.format(phase.name))
         start.next = phase.rules
         phase.rules = [start]
 
@@ -84,9 +85,11 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             graph.vp.name[vertex] = rule.verticle_name()
             graph.vp.fullname[vertex] = rule.name
             if rule is start:
-                color = TMPUTILS.start_rule_color()
+                color = self.config.start_rule_color()
             elif issubclass(rule.__class__, ChangePhase):
                 color = TMPUTILS.end_rule_color(rule, model)
+            elif len([r for k, v in rule.rules_dict().items() for r in v]) == 0:
+                color = self.config.wrong_rule_color()
             else:
                 color = TMPUTILS.rule_color()
             graph.vp.color[vertex] = color
@@ -94,12 +97,6 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             graph.vp.rotation[vertex] = pi / 4 if issubclass(rule.__class__, If) else 0
             graph.vp.text_pos[vertex] = 0
             graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
-
-            #TODO remove
-            graph.vp.color[vertex] = TMPUTILS.rule_color()
-            graph.vp.shape[vertex] = 'circle'
-            graph.vp.text_rotation[vertex] = 0
-            graph.vp.rotation[vertex] = 0
 
         for rule in rules_set:
             for next_text, next_rule_list in rule.rules_dict().items():

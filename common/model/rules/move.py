@@ -13,7 +13,10 @@ class Move(Rule):
         self.register_input(self.card_picker)
 
     def simple_name(self):
-        return 'Move'
+        f = self.card_picker.source_place_picker.place.name
+        t = self.card_picker.target_place_picker.place.name
+        c = self.card_picker.simple_name()
+        return 'Move {2} {0} -> {1}'.format(f, t, c)
 
     def apply(self, gamestate: GameState):
         cards = list(self.card_picker.submitted_choice())

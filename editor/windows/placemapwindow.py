@@ -64,9 +64,6 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
             graph.vp.color[vertex] = TMPUTILS.table_color() if place in model.table_type.places else TMPUTILS.player_color()
             graph.vp.text_pos[vertex] = 0
 
-            # TODO remove
-            graph.vp.color[vertex] = TMPUTILS.table_color()
-
         self.graph = graph
         self.place_vertex = place_vertex
 
@@ -130,8 +127,6 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
                 source = rule.card_picker.source_place_picker.place
                 target = rule.card_picker.target_place_picker.place
                 ret.append((source, target, rule))
-        #TODO remove
-        ret = []
         return ret
 
 

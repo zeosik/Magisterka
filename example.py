@@ -52,9 +52,9 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     cards = CardGenerator.cards(min_rank=1, max_rank=10, colors=list(CardColor))
 
     #miejsca
-    player_hand = player_type.add_place(PlayerCardLine('hand'))
-    deck = table_type.add_place(FaceDownCardPile('deck', starting_artifacts=cards))
-    discard_pile = table_type.add_place(FaceUpCardPile('discard pile'))
+    player_hand = player_type.add_place(PlayerCardLine('Ręka'))
+    deck = table_type.add_place(FaceDownCardPile('Talia', starting_artifacts=cards))
+    discard_pile = table_type.add_place(FaceUpCardPile('Środek'))
 
     #fazy
     phase_start = table_type.add_phase(Phase('przygotowanie planszy'))
@@ -62,12 +62,12 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     phase_end = table_type.add_phase(Phase('koniec gry'))
     game.end_phase = phase_end
     phase_choose_player = table_type.add_phase(Phase('choose-player'))
-    phase_win_check = table_type.add_phase(Phase('win-check'))
+    phase_win_check = table_type.add_phase(Phase('Tura stołu'))
     if two_phase:
         phase1 = player_type.add_phase(Phase('Tura zagrywania kart'))
         phase2_draw = player_type.add_phase(Phase('Tura dobierania kart'))
     else:
-        phase1 = player_type.add_phase(Phase('Tura zagrywania kart'))
+        phase1 = player_type.add_phase(Phase('Tura gracza'))
 
     #faza - rozdanie poczatkowe
 
@@ -102,19 +102,19 @@ def example_5_10_15(two_phase: bool = True) -> GameModel:
     card_picker = CardPicker(source_place_picker, target_place_picker)
     card_picker.add_condition(CardsSumsTo([5, 10, 15]))
     play_cards = Move(card_picker)
-    play_cards.user_name_str = "Zagraj karty"
+    #play_cards.user_name_str = "Zagraj karty"
     phase1.append_rule(play_cards)
 
     take_card_from_deck = Move(TopCardPicker(1, PlacePicker(TablePlayerChooser(), deck), PlacePicker(CurrentPlayerChooser(player_type), player_hand)))
-    take_card_from_deck.user_name_str = "Dobierz kartę"
+    #take_card_from_deck.user_name_str = "Dobierz kartę"
     if two_phase:
         passs = Pass()
-        passs.user_name_str = "Spasuj"
+        #passs.user_name_str = "Spasuj"
         phase1.append_rule(passs)
     else:
         phase1.append_rule(take_card_from_deck)
     phase1_endturn = ChangePhase(phase_win_check, TablePlayerChooser())
-    phase1_endturn.user_name_str = 'Koniec tury'
+    #phase1_endturn.user_name_str = 'Koniec tury'
     phase1.rules[0].append_next(phase1_endturn)
     phase1.rules[1].append_next(phase1_endturn)
 
@@ -349,12 +349,13 @@ def testfoo() -> GameModel:
     return game.model
 
 
-def test2() -> GameModel:
+def test() -> GameModel:
     game = GameModel("5-10-15-test")
 
     table = game.add_table_type(PlayerType('table'))
-    p1 = game.add_player_type(PlayerType('gracz 1'))
+    p1 = game.add_player_type(PlayerType('players'))
     p2 = game.add_player_type(PlayerType('gracz 2'))
+    #p2 = PlayerType('gracz 2')
 
     p1_picker = CurrentPlayerChooser(p1)
     p2_picker = CurrentPlayerChooser(p2)
@@ -364,68 +365,71 @@ def test2() -> GameModel:
     discard = table.add_place(FaceUpCardPile('Środek'))
     discard_picker = PlacePicker(TablePlayerChooser(), discard)
 
-    p1_hand = p1.add_place(PlayerCardLine('Ręka pierwszego gracza'))
+    p1_hand = p1.add_place(PlayerCardLine('Ręka gracza'))
     p1_hand_picker = PlacePicker(p1_picker, p1_hand)
-    p2_hand = p2.add_place(PlayerCardLine('Ręka drugiego gracza'))
-    p2_hand_picker = PlacePicker(p2_picker, p2_hand)
+    #p2_hand = p2.add_place(PlayerCardLine('Ręka drugiego gracza'))
+    #p2_hand_picker = PlacePicker(p2_picker, p2_hand)
 
     p1_turn = p1.add_phase(Phase('Tura zagrywania kart'))
     p2_turn = p2.add_phase(Phase('Tura dobierania kart'))
 
 
 
-    start = table.add_phase(Phase('Przygotowanie gry'))
+    start = table.add_phase(Phase('przygotowanie gry'))
     end = table.add_phase(Phase('Koniec gry'))
     table_turn = table.add_phase(Phase('Tura stołu'))
 
     shuffle = Shuffle(deck_picker)
-    shuffle.user_name_str = 'Potasuj talie'
+    #shuffle.user_name_str = 'Potasuj talie'
     give_5_card_to_p1 = give_n_cards(5, deck_picker, p1_hand)(p1_picker)
-    give_5_card_to_p1.user_name_str = 'Przełóż 5 kart z talia do ręka pierwszego gracza'
-    give_5_card_to_p2 = give_n_cards(5, deck_picker, p2_hand)(p2_picker)
-    give_5_card_to_p2.user_name_str = 'Przełóż 5 kart z talia do ręka drugiego gracza'
+    #give_5_card_to_p1.user_name_str = 'Przełóż 5 kart z talia do ręka pierwszego gracza'
+    #give_5_card_to_p2 = give_n_cards(5, deck_picker, p2_hand)(p2_picker)
+    #give_5_card_to_p2.user_name_str = 'Przełóż 5 kart z talia do ręka drugiego gracza'
 
     to_p1_turn = ChangePhase(p1_turn, p1_picker)
-    to_p1_turn.user_name_str = 'Tura zagrywania kart'
+    #to_p1_turn.user_name_str = 'tury zagrywania kart'
     to_p2_turn = ChangePhase(p2_turn, p2_picker)
-    to_p2_turn.user_name_str = 'Tura dobierania kart'
+    #to_p2_turn.user_name_str = 'Tura dobierania kart'
     end_game = ChangePhase(end, TablePlayerChooser())
     end_game.user_name_str = 'Koniec gry'
 
     give_cards = ForEachPlayer(p1, give_n_cards(5, deck_picker, p1_hand))
-    give_cards.user_name_str = 'Dla każdego gracza'
-    give_cards.dummy_actions[0].user_name_str = 'Przenieś 5 kart z talia do ręka gracza'
+    #give_cards.user_name_str = 'Dla każdego gracza'
+    #give_cards.dummy_actions[0].user_name_str = 'Przenieś 5 kart z talia do ręka gracza'
 
     #start.append_rule(sequence([shuffle, give_5_card_to_p1, give_5_card_to_p2, to_p1_turn]))
     start.append_rule(sequence([shuffle, give_cards, to_p1_turn]))
 
     p1_play_card = Move(CardPicker(p1_hand_picker, discard_picker))
-    p1_play_card.user_name_str = ' Zagraj karty'
+    #p1_play_card.user_name_str = ' Zagraj karty'
     p1_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
     p1_take_card = Move(TopCardPicker(1, deck_picker, p1_hand_picker))
-    p1_take_card.user_name_str = 'Dobierz kartę'
+    #p1_take_card.user_name_str = 'Dobierz kartę'
     #p1_if = If(EmptyPlace(p1_hand_picker), end_game, to_p2_turn)
     #p1_if.user_name_str = 'Czy koniec gry'
     to_table_turn = ChangePhase(table_turn, TablePlayerChooser())
-    to_table_turn.user_name_str = 'Koniec tury'
+    #to_table_turn.user_name_str = 'Koniec tury'
 
     sequence([p1_play_card, to_table_turn])
     sequence([p1_take_card, to_table_turn])
     p1_turn.append_rule(p1_play_card)
     p1_turn.append_rule(p1_take_card)
+    wrong_rule_example = Pass()
+    wrong_rule_example.user_name_str = "Przykład złej reguły"
+    p1_turn.append_rule(wrong_rule_example)
 
-    p2_play_card = Move(CardPicker(p2_hand_picker, discard_picker))
-    p2_play_card.user_name_str = ' Zagraj karty'
-    p2_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
-    p2_take_card = Move(TopCardPicker(1, deck_picker, p2_hand_picker))
-    p2_take_card.user_name_str = 'Dobierz kartę'
-    p2_if = If(EmptyPlace(p2_hand_picker), end_game, to_table_turn)
-    p2_if.user_name_str = 'Czy koniec gry'
+    #p2_play_card = Move(CardPicker(p2_hand_picker, discard_picker))
+    #p2_play_card.user_name_str = ' Zagraj karty'
+    #p2_play_card.card_picker.add_condition(CardsSumsTo([5, 10, 15]))
+    #p2_take_card = Move(TopCardPicker(1, deck_picker, p2_hand_picker))
+    #p2_take_card.user_name_str = 'Dobierz kartę'
+    #p2_if = If(EmptyPlace(p2_hand_picker), end_game, to_table_turn)
+    #p2_if.user_name_str = 'Czy koniec gry'
 
-    sequence([p2_play_card, to_table_turn])
-    sequence([p2_take_card, to_table_turn])
-    p2_turn.append_rule(p2_play_card)
-    p2_turn.append_rule(p2_take_card)
+    #sequence([p2_play_card, to_table_turn])
+    #sequence([p2_take_card, to_table_turn])
+    #p2_turn.append_rule(p2_play_card)
+    #p2_turn.append_rule(p2_take_card)
 
     game.start_phase = start
     game.end_phase = end
