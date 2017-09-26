@@ -1,6 +1,7 @@
 from common.model.gamemodel import GameModel
 from common.model.phase import Phase
 from common.model.placepicker.placepicker import PlacePicker
+from common.model.places.cardline import FaceUpCardLine
 from common.model.places.place import Place
 from common.model.playerchooser.currentplayerchooser import CurrentPlayerChooser
 from common.model.playerchooser.playerchooser import PlayerChooser
@@ -31,7 +32,7 @@ class TypeCreator:
         return ret
 
     def add_place(self, name) -> (Place, PlacePicker):
-        place = Place(name)
+        place = FaceUpCardLine(name)
         self.type.add_place(place)
         place_picker = PlacePicker(CurrentPlayerChooser(self.type), place)
         return place, place_picker

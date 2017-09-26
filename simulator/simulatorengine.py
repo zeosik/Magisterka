@@ -7,7 +7,7 @@ from common.model.rules.rulepicker import RulePicker
 from simulator.network.server import Server
 from simulator.network.botclient import BotClient
 from simulator.network.humanclient import HumanClient
-from example import example_5_10_15, example_card_sequence, example_remik
+from example import example_5_10_15, example_card_sequence, example_remik, testfoo
 from simulator.gamestate import simpleGameWithOnePlayerType, GameState
 from analyzer.singlegameanalyzer import SingleGameAnalyzer
 
@@ -94,6 +94,8 @@ class SimulatorEngine():
                             if artifact.__dict__ == artifact_real.__dict__:
                                 real_choice.append(artifact_real)
                     player_inputs[index].submit_choices(real_choice)
+            self.log.debug('apply {0}'.format(current_rule.name))
+            self.print_places(self.get_places())
             current_rule.apply(self.gamestate)
 
         self.server.close_connections()

@@ -16,7 +16,7 @@ class Move(Rule):
         return 'Move'
 
     def apply(self, gamestate: GameState):
-        cards = self.card_picker.submitted_choice()
+        cards = list(self.card_picker.submitted_choice())
         place_from = self.card_picker.source_place_picker.submitted()
         place_to = self.card_picker.target_place_picker.submitted()
 

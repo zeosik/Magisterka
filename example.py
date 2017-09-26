@@ -312,8 +312,10 @@ def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Pla
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
 
 
-def test2() -> GameModel:
-    game = GameCreator('5-10-15-test')
+def testfoo() -> GameModel:
+    game = GameCreator('test')
+
+    cards = CardGenerator.cards(1, 1, list(CardColor))
 
     table, table_chooser, table_creator = game.add_table_type()
     player, player_chooser, player_creator = game.add_player_type("players")
@@ -326,6 +328,7 @@ def test2() -> GameModel:
     draw_phase = player_creator.add_phase('tura dobierania kart')
 
     deck, deck_picker = table_creator.add_place('Talia')
+    deck._artifacts = cards
     discard, discard_picker = table_creator.add_place('Środek')
     hand, hand_picker = player_creator.add_place("Ręka")
 
@@ -337,12 +340,16 @@ def test2() -> GameModel:
     give_cards = ForEachPlayer(player, give_n_cards(5, deck_picker, hand))
     give_cards.user_name_str = 'Dla każdego gracza'
     give_cards.dummy_actions[0].user_name_str = 'Przenieś 5 kart z talia do ręka gracza'
-    start_phase.append_rule(sequence([shuffle_deck, give_cards, to_table_turn]))
+    #start_phase.append_rule(sequence([shuffle_deck, give_cards, to_table_turn]))
+
+    m1 = Move(AllCardPicker(deck_picker, discard_picker))
+    m2 = Move(AllCardPicker(discard_picker, deck_picker))
+    start_phase.append_rule(sequence([m1, m2, ChangePhase(start_phase, TablePlayerChooser())]))
 
     return game.model
 
 
-def test() -> GameModel:
+def test2() -> GameModel:
     game = GameModel("5-10-15-test")
 
     table = game.add_table_type(PlayerType('table'))
