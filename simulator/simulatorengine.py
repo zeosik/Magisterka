@@ -98,6 +98,8 @@ class SimulatorEngine():
                             if artifact.__dict__ == artifact_real.__dict__:
                                 real_choice.append(artifact_real)
                     player_inputs[index].submit_choices(real_choice)
+            self.log.debug('apply {0}'.format(current_rule.name))
+            self.print_places(self.get_places())
             current_rule.apply(self.gamestate)
             last_rule_was_change_phase = issubclass(current_rule.__class__, ChangePhase)
 

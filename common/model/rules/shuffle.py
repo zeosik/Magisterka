@@ -7,7 +7,7 @@ from simulator.gamestate import GameState
 
 class Shuffle(Rule):
     def __init__(self, place_picker: PlacePicker):
-        super().__init__('Shuffle: {0}'.format(place_picker.name))
+        super().__init__('Shuffle {0}'.format(place_picker.place.name))
         self.place_picker = place_picker
         self.register_input(self.place_picker)
 

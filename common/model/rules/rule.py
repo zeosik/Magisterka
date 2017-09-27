@@ -10,12 +10,16 @@ class Rule:
         self.name = name
         self.next = []
         self.inputs = []
+        self.user_name_str = None
 
     def apply(self, gamestate: GameState):
         pass
 
     def simple_name(self) -> str:
         return self.name
+
+    def verticle_name(self) -> str:
+        return self.user_name_str if self.user_name_str is not None else self.simple_name()
 
     def register_input(self, player_input: PlayerInput):
         self.inputs += (player_input.required_inputs())

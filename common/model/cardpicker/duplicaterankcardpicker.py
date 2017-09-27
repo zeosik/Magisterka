@@ -10,6 +10,9 @@ class DuplicateRankCardPicker(CardPicker):
         super().__init__(source_place_picker, target_place_picker, 'Duplicate Card Picker')
         #TODO moze jakis artifact comparator i dac CardRankComparator
 
+    def simple_name(self):
+        return "Dup"
+
     def auto_submitted_values(self, gamestate: GameState):
         place = self.source_place_picker.submitted()
 

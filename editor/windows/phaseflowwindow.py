@@ -12,7 +12,7 @@ from common.model.rules.changephase import ChangePhase
 from common.model.rules.ifrule import If
 from common.model.rules.rule import Rule
 from editor.mediator import Mediator
-from editor.windows.tmputils import TMPUTILS
+from editor.windows.tmputils import TMPUTILS, EditorConfig
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -22,6 +22,7 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
     def __init__(self, app, mediator: Mediator):
         super().__init__(title='Phase flow', application=app)
         self.log = logging.getLogger(self.__class__.__name__)
+        self.config = EditorConfig()
         self.set_size_request(600, 400)
         self.move(0, 0)
         self.main_panel = Gtk.VBox()
@@ -52,7 +53,10 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
         top.pack_start(refresh_button, True, True, 0)
         self.main_panel.pack_start(top, False, False, 0)
 
-        start = Rule('start {0}'.format(phase.name))
+        #TMPUTILS.start_rule_color = TMPUTILS.rule_color
+        #start = phase.rules[0]
+        #start = Rule('Początek {0}'.format(phase.name))
+        start = Rule('Start {0}'.format(phase.name))
         start.next = phase.rules
         phase.rules = [start]
 
@@ -78,24 +82,31 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             vertex = graph.add_vertex()
             rule_vertex[rule] = vertex
             self.vertex_rule[vertex] = rule
-            graph.vp.name[vertex] = rule.simple_name()
+            graph.vp.name[vertex] = rule.verticle_name()
             graph.vp.fullname[vertex] = rule.name
             if rule is start:
-                color = TMPUTILS.start_rule_color()
+                color = self.config.start_rule_color()
             elif issubclass(rule.__class__, ChangePhase):
                 color = TMPUTILS.end_rule_color(rule, model)
+            elif len([r for k, v in rule.rules_dict().items() for r in v]) == 0:
+                color = self.config.wrong_rule_color()
             else:
                 color = TMPUTILS.rule_color()
             graph.vp.color[vertex] = color
-            graph.vp.shape[vertex] = 'square' if issubclass(rule.__class__, If) else 'circle'
-            graph.vp.rotation[vertex] = pi / 4 if issubclass(rule.__class__, If) else 0
+            #graph.vp.shape[vertex] = 'square' if issubclass(rule.__class__, If) else 'circle'
+            graph.vp.shape[vertex] = self.config.rule_shape(rule)
+            #graph.vp.rotation[vertex] = pi / 4 if issubclass(rule.__class__, If) else 0
+            graph.vp.rotation[vertex] = self.config.rule_rotation(rule)
             graph.vp.text_pos[vertex] = 0
-            graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
+            #graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
+            graph.vp.text_rotation[vertex] = self.config.rule_text_rotation(rule)
 
         for rule in rules_set:
             for next_text, next_rule_list in rule.rules_dict().items():
                 for next_rule in next_rule_list:
                     edge = graph.add_edge(rule_vertex[rule], rule_vertex[next_rule])
+                    #as_polish = {'No': "Nie", 'Yes': "Tak"}
+                    #graph.ep.text[edge] = as_polish[next_text] if next_text in as_polish else next_text
                     graph.ep.text[edge] = next_text
                     graph.ep.text_color[edge] = TMPUTILS.text_color(next_text)
 

@@ -15,3 +15,6 @@ class TopCardFillPicker(TopCardPicker):
         if self.card_count > 0:
             return super().auto_submitted_values(gamestate)
         return []
+
+    def simple_name(self):
+        return "TF({0})".format(self.fill_to_card_count)

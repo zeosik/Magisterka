@@ -38,6 +38,10 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
         self.log.debug('drawing place map for model {0}'.format(model.name))
         TMPUTILS.clear_container(self.main_panel)
 
+        refresh_button = Gtk.Button('Refresh')
+        refresh_button.connect('clicked', lambda w: self.draw_for(sender, model))
+        self.main_panel.pack_start(refresh_button, False, False, 0)
+
         all_places = set()
         for player_type in model.player_types + [model.table_type]:
             for place in player_type.places:
@@ -50,6 +54,7 @@ class PlaceMapWindow(Gtk.ApplicationWindow):
         graph.vp.color = graph.new_vertex_property('string')
         graph.vp.text_pos = graph.new_vertex_property('float')
         graph.ep.color = graph.new_edge_property('vector<float>')
+
 
         for place in all_places:
             vertex = graph.add_vertex()

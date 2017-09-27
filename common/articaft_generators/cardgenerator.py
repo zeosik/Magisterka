@@ -12,4 +12,8 @@ class CardGenerator():
 
     @staticmethod
     def cards_standard_52():
-        return CardGenerator.cards(1, 14, list(CardColor))
+        return CardGenerator.cards(2, 14, list(CardColor))
+
+    @staticmethod
+    def standard_cards_colors():
+        return list(CardColor)

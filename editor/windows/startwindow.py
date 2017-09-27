@@ -10,7 +10,7 @@ from gi.repository import Gtk
 
 from common.model.gamemodel import GameModel
 from editor.widgets.itemspanel.itemspanel import ItemsPanel
-from example import example_5_10_15, example_card_sequence, example_remik, example_uno
+from example import *
 
 
 class StartWindow(Gtk.ApplicationWindow):
@@ -40,7 +40,9 @@ class StartWindow(Gtk.ApplicationWindow):
     def game_examples(self) -> dict:
         games_5_10_15 = {
             '1 faza': example_5_10_15(True),
-            '2 fazy': example_5_10_15(False)
+            '2 fazy': example_5_10_15(False),
+            #test
+            'test':test()
         }
         games_two_paies = {
             'standard': example_card_sequence()

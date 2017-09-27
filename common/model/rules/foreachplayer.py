@@ -8,7 +8,7 @@ from common.model.rules.rule import Rule
 
 class ForEachPlayer(Rule):
     def __init__(self, in_player_type: PlayerType, create_action_function: Callable[[PlayerChooser], Rule]):
-        super().__init__('For each player in type {0} '.format(in_player_type.name))
+        super().__init__('For p in {0} '.format(in_player_type.name))
         self.player_type = in_player_type
         self.create_action_func = create_action_function
 
