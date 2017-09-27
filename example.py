@@ -369,10 +369,11 @@ def test() -> GameModel:
 
     return game
 
+
 def level3():
     game = GameModel('level3')
 
-    # typy graczy
+    # Typy graczy
     player_type = game.add_player_type(PlayerType('Gracze'))
     table_type = game.add_table_type(PlayerType('Stół'))
 
@@ -380,11 +381,11 @@ def level3():
     player_picker = CurrentPlayerChooser(player_type)
     next_player_picker = NextPlayerChooser(player_picker)
 
-    # rekwizyty
+    # Rekwizyty
 
-    # miejsca
+    # Miejsca
 
-    # tury
+    # Tury
     turn_player = player_type.add_phase(Phase('Tura gracza'))
     turn_game_start = table_type.add_phase(Phase('Przygotowanie planszy'))
     turn_clear_after_player = table_type.add_phase(Phase('Sprzątanie po graczu'))
@@ -392,11 +393,11 @@ def level3():
     turn_choose_next = table_type.add_phase(Phase('Wybierz gracza i przygtuj mu plansze'))
     turn_end_game = table_type.add_phase(Phase('Koniec gry'))
 
-    # oznaczenie poczatku i konca
+    # Oznaczenie poczatku i konca gry
     game.start_phase = turn_game_start
     game.end_phase = turn_end_game
 
-    # reguly do zmian tur
+    # Reguly do zmian tur
     to_first_player_turn = ChangePhase(turn_player, FirstPlayerChooser(player_type))
     to_next_player_turn = ChangePhase(turn_player, next_player_picker)
     to_clean_after_player = ChangePhase(turn_clear_after_player, table_picker)
@@ -404,7 +405,7 @@ def level3():
     to_choose_next = ChangePhase(turn_choose_next, table_picker)
     to_end_game = ChangePhase(turn_end_game, table_picker)
 
-    # reguly dla kazder z tur
+    # Reguły dla kazdej z tur
 
     # Przygotowanie planszy
     turn_game_start.append_rule(to_first_player_turn)
