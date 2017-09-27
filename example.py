@@ -6,6 +6,7 @@ from common.model.cardpicker.allcardpicker import AllCardPicker
 from common.model.conditions.artifactsinplaceequal import ArtifactsInPlaceEqual
 from common.model.conditions.artifactsinplacelessthen import ArtifactsInPlaceLessThen
 from common.model.conditions.emptyplace import EmptyPlace
+from common.model.conditions.ifcounter import IfCounter
 from common.model.conditions.ifnot import IfNot
 from common.model.conditions.ifnumberofplayers import IfNumberOfPlayers
 from common.model.conditions.iscurrentplayerinphase import IsCurrentPlayerInPhase
@@ -311,7 +312,119 @@ def example_remik() -> GameModel:
 def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Place):
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
 
+
 def test() -> GameModel:
+    game = GameModel('test')
+
+    #typy graczy
+    player_type = game.add_player_type(PlayerType('Gracze'))
+    table_type = game.add_table_type(PlayerType('Stół'))
+
+    table_picker = TablePlayerChooser()
+    player_picker = CurrentPlayerChooser(player_type)
+    next_player_picker = NextPlayerChooser(player_picker)
+    first_player_picker = FirstPlayerChooser(player_type)
+
+    #rekwizyty
+
+    #miejsca
+
+    #tury
+    turn_player = player_type.add_phase(Phase('Tura gracza'))
+    turn_game_start = table_type.add_phase(Phase('Przygotowanie planszy'))
+    turn_clear_after_player = table_type.add_phase(Phase('Sprzątanie po graczu'))
+    turn_check_end_game = table_type.add_phase(Phase('Sprawdzenie wygranej'))
+    turn_choose_next = table_type.add_phase(Phase('Wybierz gracza i przygtuj mu plansze'))
+    turn_end_game = table_type.add_phase(Phase('Koniec gry'))
+
+    #oznaczenie poczatku i konca
+    game.start_phase = turn_game_start
+    game.end_phase = turn_end_game
+
+    #reguly do zmian tur
+    to_first_player_turn = ChangePhase(turn_player, first_player_picker)
+    to_next_player_turn = ChangePhase(turn_player, next_player_picker)
+    to_clean_after_player = ChangePhase(turn_clear_after_player, table_picker)
+    to_check_end_game = ChangePhase(turn_check_end_game, table_picker)
+    to_choose_next = ChangePhase(turn_choose_next, table_picker)
+    to_end_game = ChangePhase(turn_end_game, table_picker)
+
+    #reguly dla kazder z tur
+
+    #Przygotowanie planszy
+    turn_game_start.append_rule(to_first_player_turn)
+
+    #Tura gracza
+    turn_player.append_rule(to_clean_after_player)
+
+    #Sprzątanie po graczu
+    turn_clear_after_player.append_rule(to_check_end_game)
+
+    #Sprawdzenie wygranej
+    rule_check_end_game = If(IfCounter(1), to_end_game, to_choose_next)
+    turn_check_end_game.append_rule(rule_check_end_game)
+
+    #Wybierz gracza i przygtuj mu plansze
+    turn_choose_next.append_rule(to_next_player_turn)
+
+    return game
+
+def level3():
+    game = GameModel('level3')
+
+    # typy graczy
+    player_type = game.add_player_type(PlayerType('Gracze'))
+    table_type = game.add_table_type(PlayerType('Stół'))
+
+    table_picker = TablePlayerChooser()
+    player_picker = CurrentPlayerChooser(player_type)
+    next_player_picker = NextPlayerChooser(player_picker)
+
+    # rekwizyty
+
+    # miejsca
+
+    # tury
+    turn_player = player_type.add_phase(Phase('Tura gracza'))
+    turn_game_start = table_type.add_phase(Phase('Przygotowanie planszy'))
+    turn_clear_after_player = table_type.add_phase(Phase('Sprzątanie po graczu'))
+    turn_check_end_game = table_type.add_phase(Phase('Sprawdzenie wygranej'))
+    turn_choose_next = table_type.add_phase(Phase('Wybierz gracza i przygtuj mu plansze'))
+    turn_end_game = table_type.add_phase(Phase('Koniec gry'))
+
+    # oznaczenie poczatku i konca
+    game.start_phase = turn_game_start
+    game.end_phase = turn_end_game
+
+    # reguly do zmian tur
+    to_first_player_turn = ChangePhase(turn_player, FirstPlayerChooser(player_type))
+    to_next_player_turn = ChangePhase(turn_player, next_player_picker)
+    to_clean_after_player = ChangePhase(turn_clear_after_player, table_picker)
+    to_check_end_game = ChangePhase(turn_check_end_game, table_picker)
+    to_choose_next = ChangePhase(turn_choose_next, table_picker)
+    to_end_game = ChangePhase(turn_end_game, table_picker)
+
+    # reguly dla kazder z tur
+
+    # Przygotowanie planszy
+    turn_game_start.append_rule(to_first_player_turn)
+
+    # Tura gracza
+    turn_player.append_rule(to_clean_after_player)
+
+    # Sprzątanie po graczu
+    turn_clear_after_player.append_rule(to_check_end_game)
+
+    # Sprawdzenie wygranej
+    rule_check_end_game = If(IfCounter(1), to_end_game, to_choose_next)
+    turn_check_end_game.append_rule(rule_check_end_game)
+
+    # Wybierz gracza i przygtuj mu plansze
+    turn_choose_next.append_rule(to_next_player_turn)
+
+    return game
+
+def test2() -> GameModel:
     game = GameCreator('test')
 
     player, player_chooser, player_creator = game.add_player_type('gracze')
@@ -334,7 +447,6 @@ def test() -> GameModel:
     check_win.append_rule(ChangePhase(end, table_chooser))
     check_win.append_rule(ChangePhase(choose_player, table_chooser))
     choose_player.append_rule(ChangePhase(player_turn, player_chooser))
-
 
     return game.model
 
