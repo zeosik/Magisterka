@@ -311,8 +311,35 @@ def example_remik() -> GameModel:
 def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Place):
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
 
+def test() -> GameModel:
+    game = GameCreator('test')
 
-def testfoo() -> GameModel:
+    player, player_chooser, player_creator = game.add_player_type('gracze')
+    table, table_chooser, table_creator = game.add_table_type('stół')
+
+
+    start = table_creator.add_start_phase('przygotowanie planszy')
+    end = table_creator.add_end_phase('koniec gry')
+    table_turn = table_creator.add_phase('posprzątaj po graczu')
+
+    player_turn = player_creator.add_phase('tura gracza')
+
+    choose_player = table_creator.add_phase('wybierz gracza i przygotuj mu plansze')
+    check_win = table_creator.add_phase('sprawdz wygraną')
+
+
+    start.append_rule(ChangePhase(player_turn, player_chooser))
+    player_turn.append_rule(ChangePhase(table_turn, table_chooser))
+    table_turn.append_rule(ChangePhase(check_win, table_chooser))
+    check_win.append_rule(ChangePhase(end, table_chooser))
+    check_win.append_rule(ChangePhase(choose_player, table_chooser))
+    choose_player.append_rule(ChangePhase(player_turn, player_chooser))
+
+
+    return game.model
+
+
+def test23() -> GameModel:
     game = GameCreator('test')
 
     cards = CardGenerator.cards(1, 1, list(CardColor))
@@ -340,16 +367,14 @@ def testfoo() -> GameModel:
     give_cards = ForEachPlayer(player, give_n_cards(5, deck_picker, hand))
     give_cards.user_name_str = 'Dla każdego gracza'
     give_cards.dummy_actions[0].user_name_str = 'Przenieś 5 kart z talia do ręka gracza'
-    #start_phase.append_rule(sequence([shuffle_deck, give_cards, to_table_turn]))
+    start_phase.append_rule(sequence([shuffle_deck, give_cards, to_table_turn]))
 
-    m1 = Move(AllCardPicker(deck_picker, discard_picker))
-    m2 = Move(AllCardPicker(discard_picker, deck_picker))
-    start_phase.append_rule(sequence([m1, m2, ChangePhase(start_phase, TablePlayerChooser())]))
+
 
     return game.model
 
 
-def test() -> GameModel:
+def test2() -> GameModel:
     game = GameModel("5-10-15-test")
 
     table = game.add_table_type(PlayerType('table'))

@@ -6,6 +6,8 @@ from common.model.phase import Phase
 from common.model.rules.changephase import ChangePhase
 from common.model.rules.rule import Rule
 
+from math import pi
+
 tmp = {}
 
 class EditorConfig:
@@ -16,6 +18,9 @@ class EditorConfig:
         self.config.read(self.filename)
 
         self.colors = self.config['colors']
+        self.shapes = self.config['shapes']
+        self.rotation = self.config['rotation']
+        self.text_rotation = self.config['text-rotation']
 
     def player_color(self, number = 1):
         return self.colors['player-type{0}'.format(number)]
@@ -44,6 +49,36 @@ class EditorConfig:
 
     def wrong_rule_color(self):
         return self.colors['wrong-rule']
+
+    def rule_default_shape(self):
+        return self.shapes['default']
+
+    def rule_shape(self, rule: Rule):
+        name = self._name(rule)
+        if name in self.shapes:
+            return self.shapes[name]
+        return self.rule_default_shape()
+
+    def rule_default_rotation(self):
+        return eval(self.rotation['default'])
+
+    def rule_rotation(self, rule: Rule):
+        name = self._name(rule)
+        if name in self.rotation:
+            return eval(self.rotation[name])
+        return self.rule_default_rotation()
+
+    def rule_default_text_rotation(self):
+        return eval(self.rotation['default'])
+
+    def rule_text_rotation(self, rule: Rule):
+        name = self._name(rule)
+        if name in self.text_rotation:
+            return eval(self.text_rotation[name])
+        return self.rule_default_text_rotation()
+
+    def _name(self, rule: Rule):
+        return "rule-{0}".format(rule.__class__.__name__.lower())
 
 
 

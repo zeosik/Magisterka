@@ -93,18 +93,21 @@ class PhaseFlowWindow(Gtk.ApplicationWindow):
             else:
                 color = TMPUTILS.rule_color()
             graph.vp.color[vertex] = color
-            graph.vp.shape[vertex] = 'square' if issubclass(rule.__class__, If) else 'circle'
-            graph.vp.rotation[vertex] = pi / 4 if issubclass(rule.__class__, If) else 0
+            #graph.vp.shape[vertex] = 'square' if issubclass(rule.__class__, If) else 'circle'
+            graph.vp.shape[vertex] = self.config.rule_shape(rule)
+            #graph.vp.rotation[vertex] = pi / 4 if issubclass(rule.__class__, If) else 0
+            graph.vp.rotation[vertex] = self.config.rule_rotation(rule)
             graph.vp.text_pos[vertex] = 0
-            graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
+            #graph.vp.text_rotation[vertex] = - pi / 4 if issubclass(rule.__class__, If) else 0
+            graph.vp.text_rotation[vertex] = self.config.rule_text_rotation(rule)
 
         for rule in rules_set:
             for next_text, next_rule_list in rule.rules_dict().items():
                 for next_rule in next_rule_list:
                     edge = graph.add_edge(rule_vertex[rule], rule_vertex[next_rule])
-
-                    as_polish = {'No': "Nie", 'Yes': "Tak"}
-                    graph.ep.text[edge] = as_polish[next_text] if next_text in as_polish else next_text
+                    #as_polish = {'No': "Nie", 'Yes': "Tak"}
+                    #graph.ep.text[edge] = as_polish[next_text] if next_text in as_polish else next_text
+                    graph.ep.text[edge] = next_text
                     graph.ep.text_color[edge] = TMPUTILS.text_color(next_text)
 
         pos = sfdp_layout(graph)
