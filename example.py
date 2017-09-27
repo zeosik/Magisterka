@@ -313,23 +313,28 @@ def give_n_cards(number: int, table_place_picker: PlacePicker, player_place: Pla
     return lambda player_picker: Move(TopCardPicker(number, table_place_picker, PlacePicker(player_picker, player_place)))
 
 
-def test() -> GameModel:
-    game = GameModel('test')
+def test():
+    game = GameModel('Wyścig par')
 
-    #typy graczy
+    # Typy graczy
     player_type = game.add_player_type(PlayerType('Gracze'))
     table_type = game.add_table_type(PlayerType('Stół'))
 
     table_picker = TablePlayerChooser()
-    player_picker = CurrentPlayerChooser(player_type)
-    next_player_picker = NextPlayerChooser(player_picker)
-    first_player_picker = FirstPlayerChooser(player_type)
+    current_player_picker = CurrentPlayerChooser(player_type)
+    next_player_picker = NextPlayerChooser(current_player_picker)
 
-    #rekwizyty
+    # Rekwizyty
+    cards = CardGenerator.cards(min_rank=1, max_rank=10
+                                , colors=CardGenerator.standard_cards_colors())
 
-    #miejsca
+    # Miejsca
+    deck = table_type.add_place(FaceDownCardPile('Talia', cards))
+    middle = table_type.add_place(FaceUpCardLine('Środek'))
+    discard = table_type.add_place(FaceUpCardLine('Odrzucone'))
+    hand = player_type.add_place(PlayerCardLine('Zdobyte'))
 
-    #tury
+    # Tury
     turn_player = player_type.add_phase(Phase('Tura gracza'))
     turn_game_start = table_type.add_phase(Phase('Przygotowanie planszy'))
     turn_clear_after_player = table_type.add_phase(Phase('Sprzątanie po graczu'))
@@ -337,35 +342,68 @@ def test() -> GameModel:
     turn_choose_next = table_type.add_phase(Phase('Wybierz gracza i przygtuj mu plansze'))
     turn_end_game = table_type.add_phase(Phase('Koniec gry'))
 
-    #oznaczenie poczatku i konca
+    # Oznaczenie poczatku i konca gry
     game.start_phase = turn_game_start
     game.end_phase = turn_end_game
 
-    #reguly do zmian tur
-    to_first_player_turn = ChangePhase(turn_player, first_player_picker)
+    # Reguly do zmian tur
+    to_first_player_turn = ChangePhase(turn_player, FirstPlayerChooser(player_type))
     to_next_player_turn = ChangePhase(turn_player, next_player_picker)
     to_clean_after_player = ChangePhase(turn_clear_after_player, table_picker)
     to_check_end_game = ChangePhase(turn_check_end_game, table_picker)
     to_choose_next = ChangePhase(turn_choose_next, table_picker)
     to_end_game = ChangePhase(turn_end_game, table_picker)
 
-    #reguly dla kazder z tur
+    # Reguły dla kazdej z tur
 
-    #Przygotowanie planszy
-    turn_game_start.append_rule(to_first_player_turn)
 
-    #Tura gracza
-    turn_player.append_rule(to_clean_after_player)
 
-    #Sprzątanie po graczu
-    turn_clear_after_player.append_rule(to_check_end_game)
+    # Przygotowanie planszy
+    deck_picker = PlacePicker(table_picker, deck)
+    middle_picker = PlacePicker(table_picker, middle)
 
-    #Sprawdzenie wygranej
-    rule_check_end_game = If(IfCounter(1), to_end_game, to_choose_next)
+    shuffle_deck = Shuffle(deck_picker)
+    fill_middle = Move(TopCardPicker(8, deck_picker, middle_picker))
+
+    turn_game_start.append_rule(sequence([shuffle_deck, fill_middle, to_first_player_turn]))
+
+    # Tura gracza
+    current_hand_picker = PlacePicker(current_player_picker, hand)
+
+    pick_cards = Move(CardPicker(middle_picker, current_hand_picker))
+
+    turn_player.append_rule(sequence([pick_cards, to_clean_after_player]))
+    turn_player.append_rule(sequence([Pass(), to_clean_after_player]))
+
+    # Sprzątanie po graczu
+    discard_picker = PlacePicker(table_picker, discard)
+
+    move_duplicates = Move(DuplicateRankCardPicker(current_hand_picker, discard_picker))
+
+    turn_clear_after_player.append_rule(sequence([move_duplicates, to_check_end_game]))
+
+    # Sprawdzenie wygranej
+    rule_check_end_game = If(ArtifactsInPlaceEqual(10, current_hand_picker)
+                             , to_end_game, to_choose_next)
     turn_check_end_game.append_rule(rule_check_end_game)
 
-    #Wybierz gracza i przygtuj mu plansze
-    turn_choose_next.append_rule(to_next_player_turn)
+    # Wybierz gracza i przygtuj mu plansze
+    fill_middle_to_8 = Move(TopCardFillPicker(8, deck_picker, middle_picker))
+    fill_middle_and_to_next_player_turn = sequence([fill_middle_to_8, to_next_player_turn])
+
+    move_discard_to_deck = Move(AllCardPicker(discard_picker, deck_picker))
+    reshuffle_deck = Shuffle(deck_picker)
+    if_reshuffle = If(ArtifactsInPlaceLessThen(8, deck_picker)
+                      , sequence([move_discard_to_deck, reshuffle_deck
+                                     , fill_middle_and_to_next_player_turn])
+                      , fill_middle_and_to_next_player_turn)
+
+    move_middle_to_discard = Move(AllCardPicker(middle_picker, discard_picker))
+    if_passed = If(ArtifactsInPlaceEqual(8, middle_picker)
+                   , sequence([move_middle_to_discard, if_reshuffle])
+                   , if_reshuffle)
+
+    turn_choose_next.append_rule(if_passed)
 
     return game
 
